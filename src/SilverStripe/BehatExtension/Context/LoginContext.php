@@ -5,7 +5,7 @@ namespace SilverStripe\BehatExtension\Context;
 use Behat\Behat\Context\ClosuredContextInterface,
 Behat\Behat\Context\TranslatedContextInterface,
 Behat\Behat\Context\BehatContext,
-Behat\Behat\Context\Step,
+Behat\Behat\Definition\Call,
 Behat\Behat\Exception\PendingException;
 use Behat\Gherkin\Node\PyStringNode,
 Behat\Gherkin\Node\TableNode;
@@ -106,7 +106,7 @@ class LoginContext extends BehatContext
             $this->cache_generatedMembers[$permCode] = $member;
         }
 
-        return new Step\Given(sprintf('I log in with "%s" and "%s"', "$permCode@example.org", 'secret'));
+        return new Call\Given(sprintf('I log in with "%s" and "%s"', "$permCode@example.org", 'secret'));
     }
 
     /**

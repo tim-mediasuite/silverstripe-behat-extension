@@ -72,7 +72,7 @@ class InitProcessor extends BaseProcessor
             throw new \InvalidArgumentException('Please specify a module name (e.g. "@mymodule")');
         }
 
-        // Can't use 'behat.paths.base' since that's locked at this point to base folder (not module)
+        // Can't use 'paths.base' since that's locked at this point to base folder (not module)
         $pathSuffix   = $this->container->getParameter('behat.silverstripe_extension.context.path_suffix');
         $currentModuleName = null;
         $modules = \SS_ClassLoader::instance()->getManifest()->getModules();
@@ -101,7 +101,7 @@ class InitProcessor extends BaseProcessor
         $namespace .= '\\' . $this->container->getParameter('behat.silverstripe_extension.context.namespace_suffix');
 
         $featuresPath = rtrim($currentModulePath.DIRECTORY_SEPARATOR.$pathSuffix,DIRECTORY_SEPARATOR);
-        $basePath     = $this->container->getParameter('behat.paths.base').DIRECTORY_SEPARATOR;
+        $basePath     = $this->container->getParameter('paths.base').DIRECTORY_SEPARATOR;
         $bootstrapPath = $featuresPath.DIRECTORY_SEPARATOR.'bootstrap';
         $contextPath  = $bootstrapPath.DIRECTORY_SEPARATOR.'Context';
 
@@ -118,8 +118,7 @@ class InitProcessor extends BaseProcessor
 
         if (!is_dir($contextPath)) {
             mkdir($contextPath, 0777, true);
-
-            $className = $this->container->getParameter('behat.context.class');
+            $className = $this->container->getParameter('context.class');
             file_put_contents(
                 $contextPath . DIRECTORY_SEPARATOR . $className . '.php',
                 strtr($this->getFeatureContextSkelet(), array(

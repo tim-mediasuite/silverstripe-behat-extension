@@ -5,7 +5,7 @@ namespace SilverStripe\BehatExtension\Context;
 use Behat\Behat\Context\ClosuredContextInterface,
     Behat\Behat\Context\TranslatedContextInterface,
     Behat\Behat\Context\BehatContext,
-    Behat\Behat\Context\Step,
+    Behat\Behat\Definition\Call,
     Behat\Behat\Event\StepEvent,
     Behat\Behat\Event\ScenarioEvent,
     Behat\Behat\Exception\PendingException;
@@ -404,7 +404,7 @@ JS;
         $this->getSession()->executeScript($js);
         $this->getSession()->wait(1000);
 
-        return new Step\Given(sprintf('I attach the file "%s" to "%s"', $path, $field));
+        return new Call\Given(sprintf('I attach the file "%s" to "%s"', $path, $field));
     }
 
 	/**

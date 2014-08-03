@@ -2,7 +2,7 @@
 
 namespace SilverStripe\BehatExtension\Context;
 
-use Behat\Behat\Context\Step,
+use Behat\Behat\Definition\Call,
 	Behat\Behat\Event\FeatureEvent,
 	Behat\Behat\Event\ScenarioEvent,
 	Behat\Behat\Event\SuiteEvent;
@@ -335,7 +335,7 @@ class SilverStripeContext extends MinkContext implements SilverStripeAwareContex
 			$this->getSession()->getDriver()->getClient()->followRedirects(false);
 		}
 
-		return new Step\Given($step);
+		return new Call\Given($step);
 	}
 
 	/**
