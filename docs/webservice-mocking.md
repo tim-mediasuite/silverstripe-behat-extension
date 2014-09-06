@@ -8,28 +8,24 @@ SOAP is a common web service layer to achieve this level of interaction.
 
 Web services have a couple of disadvantages when it comes to testing though:
 
- - They're slow down our tests, responding in seconds rather than milliseconds
+ - They slow down our tests, responding in seconds rather than milliseconds
  - Their data can change over time, making it hard to start with a clean slate
  - They're not isolated, meaning multiple test runs accessing a webservice in parallel can cause side effects for each other
  - Since their data isn't defined in our tests, its hard to understand the assumptions and requirements of a test.
 
-This is where mocks objects come in, which replace the "real"
-webservice with a fake data defined in our test framework.
-The challenge is to get mocks defined as in-memory objects via PHP
-while executing Behat steps on the commandline, but applying those
-same mocks in a different process when Behat/Mink/Selenium
-perform a web request. That's solved by generated PHP code which is
-included as part of the bootstrap process.
+This is where fake objects come in, which replace the "real" webservice with a fake data defined in our test framework.
+The challenge is to get these fakes defined in a way that allows sharing of state
+between the Behat test executed on the commandline, and the various PHP processes
+launched in a browser based on this test.
 
 There's several parts to this:
 
  - [Behat](http://behat.org) parses features into executable steps
  - [Mink](http://mink.behat.org) interacts with [Selenium](http://selenium.googlecode.com) to remote control a browser
  - PHP's built-in `SoapClient` is used for the "real" API connection
- - A "gateway" class which encapsulates the SOAP interactions
- - [Phockito](https://github.com/hafriedlander/phockito) as a mocking framework to "hardcode" method returns
- - The `TestSessionStubCodeWriter` which writes PHP code to be included only in test runs.
- In our case it contains Phockito mock object definitions.
+ - A "gateway" class which encapsulates the webservice interactions
+ - The [testsession module](https://github.com/silverstripe-labs/silverstripe-testsession) creates a "sandbox" environment with a fresh database, and allows sharing state between command line and web requests
+ - The [fakedatabase module](https://github.com/chillu/fakedatabase) persists arbitrary key/value pairs in a temporary JSON file
 
 ## Example: A Currency Conversion Rate Viewer
 
@@ -52,10 +48,10 @@ Feature:
 		Then I should see "NZD -> EUR: 1.56"
 ```
 
-Follow the [Behat+SilverStripe installation instructions](https://github.com/silverstripe-labs/silverstripe-behat-extension), then install the Phockito mocking framework:
+Follow the [Behat+SilverStripe installation instructions](https://github.com/silverstripe-labs/silverstripe-behat-extension), then install the [fakedatabase](https://github.com/chillu/fakedatabase) dependency:
 
 ```
-composer require hafriedlander/phockito:*
+composer require chillu/fakedatabase:*
 ```
 
 First we'll create a `CurrencyGateway` class which encapsulates a `SoapClient`
@@ -83,7 +79,7 @@ We'll stick to request parameters and plaintext responses just to keep the code
 manageable, a more realistic controller would likely use a form and HTML formatted responses.
 Its important that our `CurrencyGateway` is instanciated through the 
 use of [dependency injection](http://doc.silverstripe.org/framework/en/trunk/reference/injector),
-so we can replace its implementation with a mock object later.
+so we can replace its implementation with a fake object later.
 
 ```php
 // mysite/code/MyController.php
@@ -116,47 +112,23 @@ Open the already generated `FeatureContext.php` file and add the following code.
 // mysite/tests/behat/features/bootstrap/Context/FeatureContext.php
 class FeatureContext extends SilverStripeContext {
 
-	protected $stubCodeWriter;
-
-	public function __construct() {
-		// ...
-
-		$this->stubCodeWriter = Injector::inst()->get('TestSessionStubCodeWriter');
-	}
+	protected $manager;
 
 	/**
 	 * @BeforeScenario
 	 */
-	public function initTestSessionStubCode() {
-		$php = <<<PHP
-\$mock = Phockito::mock('CurrencyGateway');
-Injector::inst()->registerService(\$mock, 'CurrencyGateway');
-PHP;
-		$this->stubCodeWriter->write($php);
-	}
-
-	/**
-	 * @AfterScenario
-	 */
-	public function resetTestSessionStubCode() {
-		$this->stubCodeWriter->reset();
-	}
-
-	public function getTestSessionState() {
-		return array_merge(
-			parent::getTestSessionState(),
-			array('stubfile' => $this->stubCodeWriter->getFilePath())
-		);
+	public function createManager() {
+		// ...
+		$testState = Injector::inst()->get('TestSessionEnvironment')->getState();
+		$db = new FakeDatabase($testState->fakeDatabasePath);
+		$this->manager = Injector::inst()->get('FakeManager', false, array($db));
 	}
 
 	/**
 	 * @Given /^I have a currency rate from "([^"]*)" to "([^"]*)" of "([^"]*)"$/
 	 */
 	public function stepGivenACurrency($from, $to, $rate) {
-		$php = <<<PHP
-Phockito::when(\$mock->convert('$from','$to'))->return($rate);
-PHP;
-		$writer->write($php);
+		$this->manager->getDb()->set('Currency', "{$from}-{$to}", $rate);
 	}
 }
 ```

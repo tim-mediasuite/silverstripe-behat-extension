@@ -176,6 +176,7 @@ class SilverStripeContext extends MinkContext implements SilverStripeAwareContex
 		}
 
 		$state = $this->getTestSessionState();
+		var_dump($state);
 		$this->testSessionEnvironment->startTestSession($state);
 
 		// Optionally import database
