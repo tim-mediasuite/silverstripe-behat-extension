@@ -8,11 +8,11 @@ use Behat\Behat\Context\ClosuredContextInterface,
 	Behat\Behat\Context\Step,
 	Behat\Behat\Event\StepEvent,
 	Behat\Behat\Event\FeatureEvent,
-	Behat\Behat\Event\ScenarioEvent,
 	Behat\Behat\Exception\PendingException,
 	Behat\Mink\Driver\Selenium2Driver,
 	Behat\Gherkin\Node\PyStringNode,
 	Behat\Gherkin\Node\TableNode;
+use Behat\Behat\Event\BaseScenarioEvent;
 
 // PHPUnit
 require_once 'PHPUnit/Autoload.php';
@@ -84,7 +84,7 @@ class FixtureContext extends BehatContext
 	/**
 	 * @BeforeScenario @database-defaults
 	 */
-	public function beforeDatabaseDefaults(ScenarioEvent $event) {
+	public function beforeDatabaseDefaults(BaseScenarioEvent $event) {
 		\SapphireTest::empty_temp_db();
 		\DB::getConn()->quiet();
 		$dataClasses = \ClassInfo::subclassesFor('DataObject');
@@ -97,14 +97,14 @@ class FixtureContext extends BehatContext
 	/**
 	 * @AfterScenario
 	 */
-	public function afterResetDatabase(ScenarioEvent $event) {
+	public function afterResetDatabase(BaseScenarioEvent $event) {
 		\SapphireTest::empty_temp_db();
 	}
 
 	/**
 	 * @AfterScenario
 	 */
-	public function afterResetAssets(ScenarioEvent $event) {
+	public function afterResetAssets(BaseScenarioEvent $event) {
 		if (is_array($this->createdFilesPaths)) {
 			$createdFiles = array_reverse($this->createdFilesPaths);
 			foreach ($createdFiles as $path) {
@@ -119,7 +119,7 @@ class FixtureContext extends BehatContext
 
 	/**
 	 * Example: Given a "page" "Page 1"
-	 * 
+	 *
 	 * @Given /^(?:(an|a|the) )"(?<type>[^"]+)" "(?<id>[^"]+)"$/
 	 */
 	public function stepCreateRecord($type, $id) {
@@ -129,8 +129,8 @@ class FixtureContext extends BehatContext
 	}
 
 	/**
-	 * Example: Given a "page" "Page 1" has the "content" "My content" 
-	 * 
+	 * Example: Given a "page" "Page 1" has the "content" "My content"
+	 *
 	 * @Given /^(?:(an|a|the) )"(?<type>[^"]+)" "(?<id>[^"]+)" has (?:(an|a|the) )"(?<field>.*)" "(?<value>.*)"$/
 	 */
 	public function stepCreateRecordHasField($type, $id, $field, $value) {
@@ -150,17 +150,17 @@ class FixtureContext extends BehatContext
 			$this->fixtureFactory->createObject($class, $id, $fields);
 		}
 	}
-   
+
 	/**
-	 * Example: Given a "page" "Page 1" with "URL"="page-1" and "Content"="my page 1" 
-	 * Example: Given the "page" "Page 1" has "URL"="page-1" and "Content"="my page 1" 
-	 * 
+	 * Example: Given a "page" "Page 1" with "URL"="page-1" and "Content"="my page 1"
+	 * Example: Given the "page" "Page 1" has "URL"="page-1" and "Content"="my page 1"
+	 *
 	 * @Given /^(?:(an|a|the) )"(?<type>[^"]+)" "(?<id>[^"]+)" (?:(with|has)) (?<data>".*)$/
 	 */
 	public function stepCreateRecordWithData($type, $id, $data) {
 		$class = $this->convertTypeToClass($type);
 		preg_match_all(
-			'/"(?<key>[^"]+)"\s*=\s*"(?<value>[^"]+)"/', 
+			'/"(?<key>[^"]+)"\s*=\s*"(?<value>[^"]+)"/',
 			$data,
 			$matches
 		);
@@ -182,11 +182,11 @@ class FixtureContext extends BehatContext
 	}
 
 	/**
-	 * Example: And the "page" "Page 2" has the following data 
+	 * Example: And the "page" "Page 2" has the following data
 	 * | Content | <blink> |
 	 * | My Property | foo |
 	 * | My Boolean | bar |
-	 * 
+	 *
 	 * @Given /^(?:(an|a|the) )"(?<type>[^"]+)" "(?<id>[^"]+)" has the following data$/
 	 */
 	public function stepCreateRecordWithTable($type, $id, $null, TableNode $fieldsTable) {
@@ -210,7 +210,7 @@ class FixtureContext extends BehatContext
 	/**
 	 * Example: Given the "page" "Page 1.1" is a child of the "page" "Page1".
 	 * Note that this change is not published by default
-	 * 
+	 *
 	 * @Given /^(?:(an|a|the) )"(?<type>[^"]+)" "(?<id>[^"]+)" is a (?<relation>[^\s]*) of (?:(an|a|the) )"(?<relationType>[^"]+)" "(?<relationId>[^"]+)"/
 	 */
 	public function stepUpdateRecordRelation($type, $id, $relation, $relationType, $relationId) {
@@ -263,7 +263,7 @@ class FixtureContext extends BehatContext
 	 * Assign a type of object to another type of object. The base object will be created if it does not exist already.
 	 * If the last part of the string (in the "X" relation) is omitted, then the first matching relation will be used.
 	 * Assumption: one object has relationship  (has_one, has_many or many_many ) with the other object
-	 * 
+	 *
 	 * @example I assign the "TaxonomyTerm" "For customers" to the "Page" "Page1" in the "Terms" relation
 	 * @Given /^I assign (?:(an|a|the) )"(?<type>[^"]+)" "(?<value>[^"]+)" to (?:(an|a|the) )"(?<relationType>[^"]+)" "(?<relationId>[^"]+)" in the "(?<relationName>[^"]+)" relation$/
 	 */
@@ -294,7 +294,7 @@ class FixtureContext extends BehatContext
 			throw new \Exception("'$relationClass' has no relationship (has_one, has_many and many_many) with '$class'!");
 		}
 
-		// Get the searchable field to check if the fixture object already exists 
+		// Get the searchable field to check if the fixture object already exists
 		$temObj = new $class;
 		if(isset($temObj->Name)) $field = "Name";
 		else if(isset($temObj->Title)) $field = "Title";
@@ -311,14 +311,14 @@ class FixtureContext extends BehatContext
 			// E.g. $has_one = array('PanelOffer' => 'Offer');
 			// then the join field is PanelOfferID. This is the common rule in the CMS
 			$relationObj->{$oneField . 'ID'} = $obj->ID;
-		} 
-		
+		}
+
 		$relationObj->write();
 	}
- 
+
 	 /**
-	 * Example: Given the "page" "Page 1" is not published 
-	 * 
+	 * Example: Given the "page" "Page 1" is not published
+	 *
 	 * @Given /^(?:(an|a|the) )"(?<type>[^"]+)" "(?<id>[^"]+)" is (?<state>[^"]*)$/
 	 */
 	public function stepUpdateRecordState($type, $id, $state) {
@@ -350,19 +350,19 @@ class FixtureContext extends BehatContext
 			default:
 				throw new \InvalidArgumentException(sprintf(
 					'Invalid state: "%s"', $state
-				));    
+				));
 		}
 	}
 
 	/**
 	 * Accepts YAML fixture definitions similar to the ones used in SilverStripe unit testing.
-	 * 
+	 *
 	 * Example: Given there are the following member records:
 	 *  member1:
 	 *    Email: member1@test.com
 	 *  member2:
 	 *    Email: member2@test.com
-	 * 
+	 *
 	 * @Given /^there are the following ([^\s]*) records$/
 	 */
 	public function stepThereAreTheFollowingRecords($dataObject, PyStringNode $string) {
@@ -377,26 +377,26 @@ class FixtureContext extends BehatContext
 
 	/**
 	 * Example: Given a "member" "Admin" belonging to "Admin Group"
-	 * 
+	 *
 	 * @Given /^(?:(an|a|the) )"member" "(?<id>[^"]+)" belonging to "(?<groupId>[^"]+)"$/
 	 */
 	public function stepCreateMemberWithGroup($id, $groupId) {
 		$group = $this->fixtureFactory->get('Group', $groupId);
 		if(!$group) $group = $this->fixtureFactory->createObject('Group', $groupId);
-		
+
 		$member = $this->fixtureFactory->createObject('Member', $id);
 		$member->Groups()->add($group);
 	}
 
 	/**
 	 * Example: Given a "member" "Admin" belonging to "Admin Group" with "Email"="test@test.com"
-	 * 
+	 *
 	 * @Given /^(?:(an|a|the) )"member" "(?<id>[^"]+)" belonging to "(?<groupId>[^"]+)" with (?<data>.*)$/
 	 */
 	public function stepCreateMemberWithGroupAndData($id, $groupId, $data) {
 		$class = 'Member';
 		preg_match_all(
-			'/"(?<key>[^"]+)"\s*=\s*"(?<value>[^"]+)"/', 
+			'/"(?<key>[^"]+)"\s*=\s*"(?<value>[^"]+)"/',
 			$data,
 			$matches
 		);
@@ -404,7 +404,7 @@ class FixtureContext extends BehatContext
 			$class,
 			array_combine($matches['key'], $matches['value'])
 		);
-		
+
 		$group = $this->fixtureFactory->get('Group', $groupId);
 		if(!$group) $group = $this->fixtureFactory->createObject('Group', $groupId);
 
@@ -414,7 +414,7 @@ class FixtureContext extends BehatContext
 
 	/**
 	 * Example: Given a "group" "Admin" with permissions "Access to 'Pages' section" and "Access to 'Files' section"
-	 * 
+	 *
 	 * @Given /^(?:(an|a|the) )"group" "(?<id>[^"]+)" (?:(with|has)) permissions (?<permissionStr>.*)$/
 	 */
 	public function stepCreateGroupWithPermissions($id, $permissionStr) {
@@ -425,7 +425,7 @@ class FixtureContext extends BehatContext
 
 		$group = $this->fixtureFactory->get('Group', $id);
 		if(!$group) $group = $this->fixtureFactory->createObject('Group', $id);
-		
+
 		foreach($permissions as $permission) {
 			$found = false;
 			foreach($codes as $code => $details) {
@@ -440,7 +440,7 @@ class FixtureContext extends BehatContext
 			if(!$found) {
 				throw new \InvalidArgumentException(sprintf(
 					'No permission found for "%s"', $permission
-				));    
+				));
 			}
 		}
 	}
@@ -449,7 +449,7 @@ class FixtureContext extends BehatContext
 	 * Navigates to a record based on its identifier set during fixture creation,
 	 * using its RelativeLink() method to map the record to a URL.
 	 * Example: Given I go to the "page" "My Page"
-	 * 
+	 *
 	 * @Given /^I go to (?:(an|a|the) )"(?<type>[^"]+)" "(?<id>[^"]+)"/
 	 */
 	public function stepGoToNamedRecord($type, $id) {
@@ -472,7 +472,7 @@ class FixtureContext extends BehatContext
 	/**
 	 * Checks that a file or folder exists in the webroot.
 	 * Example: There should be a file "assets/Uploads/test.jpg"
-	 * 
+	 *
 	 * @Then /^there should be a (?<type>(file|folder) )"(?<path>[^"]*)"/
 	 */
 	public function stepThereShouldBeAFileOrFolder($type, $path) {
@@ -480,9 +480,9 @@ class FixtureContext extends BehatContext
 	}
 
 	/**
-	 * Replaces fixture references in values with their respective database IDs, 
+	 * Replaces fixture references in values with their respective database IDs,
 	 * with the notation "=><class>.<identifier>". Example: "=>Page.My Page".
-	 * 
+	 *
 	 * @Transform /^([^"]+)$/
 	 */
 	public function lookupFixtureReference($string) {
@@ -517,7 +517,7 @@ class FixtureContext extends BehatContext
 			$field,
 			$date,
 			$record->ID
-		)); 
+		));
 		// Support for Versioned extension, by checking for a "Live" stage
 		if(\DB::getConn()->hasTable($table . '_Live')) {
 			\DB::query(sprintf(
@@ -526,13 +526,13 @@ class FixtureContext extends BehatContext
 				$field,
 				$date,
 				$record->ID
-			)); 
+			));
 		}
 	}
-	
+
 	/**
 	 * Prepares a fixture for use
-	 * 
+	 *
 	 * @param string $class
 	 * @param string $identifier
 	 * @param array $data
@@ -551,7 +551,7 @@ class FixtureContext extends BehatContext
 		$relativeTargetPath = preg_replace('/^' . ASSETS_DIR . '/', '', $relativeTargetPath);
 		$targetPath = $this->joinPaths(ASSETS_PATH, $relativeTargetPath);
 		$sourcePath = $this->joinPaths($this->getFilesPath(), basename($relativeTargetPath));
-		
+
 		// Create file or folder on filesystem
 		if($class == 'Folder' || is_subclass_of($class, 'Folder')) {
 			$parent = \Folder::find_or_make($relativeTargetPath);
@@ -579,8 +579,8 @@ class FixtureContext extends BehatContext
 	 * Converts a natural language class description to an actual class name.
 	 * Respects {@link DataObject::$singular_name} variations.
 	 * Example: "redirector page" -> "RedirectorPage"
-	 * 
-	 * @param String 
+	 *
+	 * @param String
 	 * @return String Class name
 	 */
 	protected function convertTypeToClass($type)  {
@@ -606,7 +606,7 @@ class FixtureContext extends BehatContext
 	/**
 	 * Updates an object with values, resolving aliases set through
 	 * {@link DataObject->fieldLabels()}.
-	 * 
+	 *
 	 * @param String Class name
 	 * @param Array Map of field names or aliases to their values.
 	 * @return Array Map of actual object properties to their values.
@@ -617,7 +617,7 @@ class FixtureContext extends BehatContext
 			if($fieldLabelKey = array_search($fieldName, $labels)) {
 				unset($fields[$fieldName]);
 				$fields[$labels[$fieldLabelKey]] = $fieldVal;
-				
+
 			}
 		}
 		return $fields;
@@ -631,5 +631,5 @@ class FixtureContext extends BehatContext
 		if (substr($args[0], 0, 1) == '/') $paths[0] = '/' . $paths[0];
 		return join('/', $paths);
 	}
-   
+
 }

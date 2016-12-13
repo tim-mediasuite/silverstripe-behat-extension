@@ -7,8 +7,8 @@ Behat\Behat\Context\TranslatedContextInterface,
 Behat\Behat\Context\BehatContext,
 Behat\Behat\Context\Step,
 Behat\Behat\Event\FeatureEvent,
-Behat\Behat\Event\ScenarioEvent,
 Behat\Behat\Exception\PendingException;
+use Behat\Behat\Event\BaseScenarioEvent;
 use Behat\Gherkin\Node\PyStringNode,
 Behat\Gherkin\Node\TableNode;
 use Symfony\Component\DomCrawler\Crawler;
@@ -54,7 +54,7 @@ class EmailContext extends BehatContext
     /**
      * @BeforeScenario
      */
-    public function before(ScenarioEvent $event)
+    public function before(BaseScenarioEvent $event)
     {
         // Also set through the 'supportbehat' extension
         // to ensure its available both in CLI execution and the tested browser session
@@ -110,7 +110,7 @@ class EmailContext extends BehatContext
      * Example: Given the email should contain "Thank you for registering!".
      * Assumes an email has been identified by a previous step,
      * e.g. through 'Given there should be an email to "test@test.com"'.
-     * 
+     *
 	 * @Given /^the email should (not |)contain "([^"]*)"$/
 	 */
 	public function thereTheEmailContains($negate, $content)
@@ -149,7 +149,7 @@ class EmailContext extends BehatContext
         assertNotNull($linkEl);
         $link = $linkEl->attr('href');
         assertNotNull($link);
-        
+
         return new Step\When(sprintf('I go to "%s"', $link));
     }
 
@@ -170,11 +170,11 @@ class EmailContext extends BehatContext
         assertNotNull($link);
         return new Step\When(sprintf('I go to "%s"', $link));
     }
-    
+
     /**
      * Assumes an email has been identified by a previous step,
      * e.g. through 'Given there should be an email to "test@test.com"'.
-     * 
+     *
      * @When /^I click on the "([^"]*)" link in the email"$/
      */
     public function iGoToInTheEmail($linkSelector)
@@ -224,7 +224,7 @@ class EmailContext extends BehatContext
 		// Convert html content to plain text
 		$emailContent = strip_tags($emailContent);
 		$rows = $table->getRows();
-		
+
 		// For "should not contain"
 		if(trim($negate)) {
 			foreach($rows as $row) {
