@@ -7,9 +7,9 @@ use Behat\Behat\Context\ClosuredContextInterface,
     Behat\Behat\Context\BehatContext,
     Behat\Behat\Context\Step,
     Behat\Behat\Event\StepEvent,
-    Behat\Behat\Event\ScenarioEvent,
     Behat\Behat\Exception\PendingException;
 
+use Behat\Behat\Event\BaseScenarioEvent;
 use Behat\Mink\Driver\Selenium2Driver;
 
 use Behat\Gherkin\Node\PyStringNode,
@@ -109,13 +109,13 @@ JS;
 	public function readErrorHandlerAfterStep(StepEvent $event) {
 		try{
 	        $page = $this->getSession()->getPage();
-	
+
 	        $jserrors = $page->find('xpath', '//body[@data-jserrors]');
 	        if (null !== $jserrors) {
 	            $this->takeScreenshot($event);
 	            file_put_contents('php://stderr', $jserrors->getAttribute('data-jserrors') . PHP_EOL);
 	        }
-	
+
 	        $javascript = <<<JS
 if ('undefined' !== typeof window.jQuery) {
 	window.jQuery(document).ready(function() {
@@ -241,7 +241,7 @@ JS;
 	 *
 	 * @AfterScenario
 	 */
-	public function closeModalDialog(ScenarioEvent $event) {
+	public function closeModalDialog(BaseScenarioEvent $event) {
 		try{
 			// Only for failed tests on CMS page
 			if (4 === $event->getResult()) {
@@ -260,13 +260,13 @@ JS;
 			$this->logException($e);
 		}
 	}
-	
+
     /**
      * Delete any created files and folders from assets directory
      *
      * @AfterScenario @assets
      */
-	public function cleanAssetsAfterScenario(ScenarioEvent $event) {
+	public function cleanAssetsAfterScenario(BaseScenarioEvent $event) {
         foreach(\File::get() as $file) {
             if(file_exists($file->getFullPath())) $file->delete();
         }
@@ -398,7 +398,7 @@ JS;
         $clickTypeFn = $clickTypeMap[$clickType];
         $element->$clickTypeFn();
     }
-    
+
     /**
     * Needs to be in single command to avoid "unexpected alert open" errors in Selenium.
     * Example: I click "Delete" in the ".actions" element, confirming the dialog
@@ -646,7 +646,7 @@ JS;
 
         $linkObj = $regionObj->findLink($link);
         if (empty($linkObj)) {
-			throw new \Exception(sprintf('The link "%s" was not found in the region "%s" 
+			throw new \Exception(sprintf('The link "%s" was not found in the region "%s"
 				on the page %s', $link, $region, $this->getSession()->getCurrentUrl()));
         }
 
@@ -667,7 +667,7 @@ JS;
 
         $fieldObj = $regionObj->findField($field);
         if (empty($fieldObj)) {
-			throw new \Exception(sprintf('The field "%s" was not found in the region "%s" 
+			throw new \Exception(sprintf('The field "%s" was not found in the region "%s"
 				on the page %s', $field, $region, $this->getSession()->getCurrentUrl()));
         }
 
@@ -786,11 +786,11 @@ JS;
         );
 
         // Find tables by a <caption> field
-		$candidates += $page->findAll('xpath', "//table//caption[contains(normalize-space(string(.)), 
+		$candidates += $page->findAll('xpath', "//table//caption[contains(normalize-space(string(.)),
 			$selector)]/ancestor-or-self::table[1]");
 
         // Find tables by a .title node
-		$candidates += $page->findAll('xpath', "//table//*[@class='title' and contains(normalize-space(string(.)), 
+		$candidates += $page->findAll('xpath', "//table//*[@class='title' and contains(normalize-space(string(.)),
 			$selector)]/ancestor-or-self::table[1]");
 
         // Some tables don't have a visible title, so look for a fieldset with data-name instead
@@ -989,14 +989,14 @@ JS;
             $backtrace[1]['function']
         ));
     }
-	
-	
-	
+
+
+
 	/**
 	 * We have to catch exceptions and log somehow else otherwise behat falls over
 	 */
 	protected function logException($e){
 		file_put_contents('php://stderr', 'Exception caught: '.$e);
 	}
-	
+
 }

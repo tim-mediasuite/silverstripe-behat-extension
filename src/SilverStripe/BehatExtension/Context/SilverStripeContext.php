@@ -4,8 +4,8 @@ namespace SilverStripe\BehatExtension\Context;
 
 use Behat\Behat\Context\Step,
 	Behat\Behat\Event\FeatureEvent,
-	Behat\Behat\Event\ScenarioEvent,
 	Behat\Behat\Event\SuiteEvent;
+use Behat\Behat\Event\BaseScenarioEvent;
 use Behat\Gherkin\Node\PyStringNode;
 use Behat\MinkExtension\Context\MinkContext;
 use Behat\Mink\Driver\GoutteDriver,
@@ -183,7 +183,7 @@ class SilverStripeContext extends MinkContext implements SilverStripeAwareContex
 	/**
 	 * @BeforeScenario
 	 */
-	public function before(ScenarioEvent $event) {
+	public function before(BaseScenarioEvent $event) {
 		if (!isset($this->databaseName)) {
 			throw new \LogicException(
 				'Context\'s $databaseName has to be set when implementing SilverStripeAwareContextInterface.'
