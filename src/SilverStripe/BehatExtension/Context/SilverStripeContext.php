@@ -14,7 +14,6 @@ use SilverStripe\BehatExtension\Context\SilverStripeAwareContextInterface;
 use Symfony\Component\Yaml\Yaml;
 use SilverStripe\TestSession\TestSessionEnvironment;
 
-
 // Mink etc.
 require_once 'vendor/autoload.php';
 
