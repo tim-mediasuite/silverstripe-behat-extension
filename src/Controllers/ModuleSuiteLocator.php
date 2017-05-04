@@ -101,24 +101,16 @@ class ModuleSuiteLocator implements Controller
         // Suite name always omits vendor
         $suiteName = $module->getShortName();
 
-        // If suite is already configured in the root, switch to it and return
-        if (isset($this->suiteConfigurations[$suiteName])) {
-            $config = $this->suiteConfigurations[$suiteName];
+        // Suite doesn't exist, so load dynamically from nested `behat.yml`
+        if (!isset($this->suiteConfigurations[$suiteName])) {
+            $config = $this->loadSuiteConfiguration($suiteName, $module);
             $this->registry->registerSuiteConfiguration(
                 $suiteName,
                 $config['type'],
                 $config['settings']
             );
-            return null;
         }
 
-        // Suite doesn't exist, so load dynamically from nested `behat.yml`
-        $config = $this->loadSuiteConfiguration($suiteName, $module);
-        $this->registry->registerSuiteConfiguration(
-            $suiteName,
-            $config['type'],
-            $config['settings']
-        );
         return null;
     }
 
