@@ -302,7 +302,9 @@ of the `TestSessionEnvironment`, in order to share it with Behat CLI.
 
 Example: Retrieve the currently logged-in member
 
-	$env = Injector::inst()->get('TestSessionEnvironment');
+    use SilverStripe\TestSession\TestsessionEnvironment;
+
+	$env = Injector::inst()->get(TestSessionEnvironment::class);
 	$state = $env->getState();
 	if(isset($state->session['loggedInAs'])) {
 		$member = \Member::get()->byID($state->session['loggedInAs']);

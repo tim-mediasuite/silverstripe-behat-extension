@@ -36,7 +36,7 @@ There's several parts to this:
 How the pieces fit together is best illustrated as an example.
 We'll create a currency rate viewer,
 based on a [free online webservice](http://www.webservicex.net/CurrencyConvertor.asmx?WSDL).
-The example assumes you have a basic knowledge of [Behat](http://behat.org) and 
+The example assumes you have a basic knowledge of [Behat](http://behat.org) and
 the [Behat SilverStripe extension](https://github.com/silverstripe-labs/silverstripe-behat-extension).
 Let's explain the feature through the Gherkin language as Behat steps:
 
@@ -81,7 +81,7 @@ class CurrencyGateway {
 The controller logic for this is really simple.
 We'll stick to request parameters and plaintext responses just to keep the code
 manageable, a more realistic controller would likely use a form and HTML formatted responses.
-Its important that our `CurrencyGateway` is instanciated through the 
+Its important that our `CurrencyGateway` is instanciated through the
 use of [dependency injection](http://doc.silverstripe.org/framework/en/trunk/reference/injector),
 so we can replace its implementation with a mock object later.
 
@@ -114,6 +114,7 @@ Open the already generated `FeatureContext.php` file and add the following code.
 
 ```php
 // mysite/tests/behat/features/bootstrap/Context/FeatureContext.php
+use namespace SilverStripe\TestSession\TestSessionStubCodeWriter;
 class FeatureContext extends SilverStripeContext {
 
 	protected $stubCodeWriter;
@@ -121,7 +122,7 @@ class FeatureContext extends SilverStripeContext {
 	public function __construct() {
 		// ...
 
-		$this->stubCodeWriter = Injector::inst()->get('TestSessionStubCodeWriter');
+		$this->stubCodeWriter = Injector::inst()->get(TestSessionStubCodeWriter::class);
 	}
 
 	/**
@@ -169,7 +170,7 @@ avoid side effects (hence the methods tagged with `@BeforeScenario` and `@AfterS
 A useful pattern here is to set up objects via `@BeforeScenario`, in our case
 a mock gateway in `initTestSessionStubCode()`. This object can be used in later
 step definitions like `stepGivenACurrency()` to mock webservice responses
-without any further setup or duplication. 
+without any further setup or duplication.
 
 The generated code which is executed on every web request reads:
 
@@ -180,8 +181,8 @@ Injector::inst()->registerService($mock, 'CurrencyGateway');
 Phockito::when($mock->convert('EUR','NZD'))->return(1.56);
 ```
 
-Keep in mind escaping rules for PHP when placed in a heredoc block: 
-Variables are resolved when the string is constructed, unless escaped with a backslash. 
+Keep in mind escaping rules for PHP when placed in a heredoc block:
+Variables are resolved when the string is constructed, unless escaped with a backslash.
 
 The test session started in your browser by Selenium/Behat needs to know
 which file to include, which is handled by the `getTestSessionState()` method.
