@@ -761,12 +761,11 @@ class FixtureContext implements Context
     }
 
     /**
-     *
      * @return AssetStore
      */
     protected function getAssetStore()
     {
-        return singleton('AssetStore');
+        return Injector::inst()->get(AssetStore::class);
     }
 
     /**
