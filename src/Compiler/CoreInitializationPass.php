@@ -32,7 +32,7 @@ class CoreInitializationPass implements CompilerPassInterface
         }
 
         // Register all paths
-        foreach (ModuleLoader::instance()->getManifest()->getModules() as $module) {
+        foreach (ModuleLoader::inst()->getManifest()->getModules() as $module) {
             $container->setParameter('paths.modules.'.$module->getShortName(), $module->getPath());
             $composerName = $module->getComposerName();
             if ($composerName) {
