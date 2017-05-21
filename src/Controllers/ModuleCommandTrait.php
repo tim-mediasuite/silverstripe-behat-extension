@@ -19,7 +19,7 @@ trait ModuleCommandTrait
         if (strpos($name, '@') === 0) {
             $name = substr($name, 1);
         }
-        $module = ModuleLoader::instance()->getManifest()->getModule($name);
+        $module = ModuleLoader::inst()->getManifest()->getModule($name);
         if (!$module) {
             throw new InvalidArgumentException("No module $name installed");
         }
