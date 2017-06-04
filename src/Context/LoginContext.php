@@ -69,19 +69,16 @@ class LoginContext implements Context
         $loginUrl = $c->joinUrlParts($c->getBaseUrl(), $c->getLoginUrl());
         $this->getMainContext()->getSession()->visit($loginUrl);
         $page = $this->getMainContext()->getSession()->getPage();
-        $forms = $page->findAll('xpath', '//form[contains(@action, "Security/LoginForm")]');
-        assertNotNull($forms, 'Login form not found');
+        $form = $page->findById('MemberLoginForm_LoginForm');
+        assertNotNull($form, 'Login form not found');
 
         // Try to find visible forms again on login page.
         $visibleForm = null;
         /** @var NodeElement $form */
-        foreach ($forms as $form) {
-            if ($form->isVisible() && $form->find('css', '[name=Email]')) {
-                $visibleForm = $form;
-            }
+        if ($form->isVisible() && $form->find('css', '[name=Email]')) {
+            $visibleForm = $form;
         }
-
-        assertNotNull($visibleForm, 'Could not find login form');
+        assertNotNull($visibleForm, 'Could not find login email field');
 
         $emailField = $visibleForm->find('css', '[name=Email]');
         $passwordField = $visibleForm->find('css', '[name=Password]');
