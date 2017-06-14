@@ -7,18 +7,22 @@ use Behat\Testwork\Suite\Cli\SuiteController;
 use Behat\Testwork\Suite\ServiceContainer\SuiteExtension;
 use Behat\Testwork\Suite\SuiteRegistry;
 use Exception;
+use InvalidArgumentException;
+use RuntimeException;
 use SilverStripe\Core\Manifest\Module;
-use Symfony\Component\DependencyInjection\Container;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\DependencyInjection\Container;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Yaml\Parser;
 
 /**
  * Locates test suite configuration based on module name.
  *
+ * Replaces:
  * @see SuiteController for similar core behat controller
  */
 class ModuleSuiteLocator implements Controller
@@ -72,6 +76,12 @@ class ModuleSuiteLocator implements Controller
                 . "Must be in @modulename format. Supports @vendor/name syntax for vendor installed modules. "
                 . "Ensure that a modulename/behat.yml exists containing a behat suite of the same name."
         );
+        $command->addOption(
+            '--suite',
+            '-s',
+            InputOption::VALUE_REQUIRED,
+            'Only execute a specific suite.'
+        );
     }
 
     /**
@@ -79,13 +89,20 @@ class ModuleSuiteLocator implements Controller
      *
      * @param InputInterface $input
      * @param OutputInterface $output
-     *
-     * @throws \RuntimeException
+     * @throws RuntimeException
      * @return null
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        if (!$input->hasArgument('module')) {
+        // Register all suites if no arguments given
+        if (!$input->getArgument('module') && !$input->getOption('suite')) {
+            foreach ($this->suiteConfigurations as $name => $config) {
+                $this->registry->registerSuiteConfiguration(
+                    $name,
+                    $config['type'],
+                    $config['settings']
+                );
+            }
             return null;
         }
 
@@ -94,23 +111,36 @@ class ModuleSuiteLocator implements Controller
             return;
         }
 
-        // Get module
-        $moduleName = $input->getArgument('module');
-        $module = $this->getModule($moduleName);
+        // Get module either via @module or --suite module
+        if ($input->getArgument('module')) {
+            // Get suite from module
+            $moduleName = $input->getArgument('module');
+            $module = $this->getModule($moduleName);
 
-        // Suite name always omits vendor
-        $suiteName = $module->getShortName();
-
-        // Suite doesn't exist, so load dynamically from nested `behat.yml`
-        if (!isset($this->suiteConfigurations[$suiteName])) {
-            $config = $this->loadSuiteConfiguration($suiteName, $module);
-            $this->registry->registerSuiteConfiguration(
-                $suiteName,
-                $config['type'],
-                $config['settings']
-            );
+            // Suite name always omits vendor
+            $suiteName = $module->getShortName();
+        } else {
+            // Get module from suite
+            $suiteName = $input->getOption('suite');
+            $module = $this->getModule($suiteName, false);
         }
 
+        // Load registered suite
+        if (isset($this->suiteConfigurations[$suiteName])) {
+            $config = $this->suiteConfigurations[$suiteName];
+        } elseif ($module) {
+            // Suite doesn't exist, so load dynamically from nested `behat.yml`
+            $config = $this->loadSuiteConfiguration($suiteName, $module);
+        } else {
+            throw new InvalidArgumentException("Could not find suite config {$suiteName}");
+        }
+
+        // Register config
+        $this->registry->registerSuiteConfiguration(
+            $suiteName,
+            $config['type'],
+            $config['settings']
+        );
         return null;
     }
 
@@ -133,7 +163,7 @@ class ModuleSuiteLocator implements Controller
                 }
             }
         }
-        throw new \InvalidArgumentException("No behat.yml found for module " . $module->getName());
+        throw new InvalidArgumentException("No behat.yml found for module " . $module->getName());
     }
 
     /**
