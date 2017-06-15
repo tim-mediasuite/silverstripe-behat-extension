@@ -4,9 +4,11 @@ namespace SilverStripe\BehatExtension\Context;
 
 use Behat\Behat\Context\Context;
 use Behat\Mink\Element\NodeElement;
+use SilverStripe\Security\Authenticator;
 use SilverStripe\Security\Group;
 use SilverStripe\Security\Member;
 use SilverStripe\Security\Permission;
+use SilverStripe\Security\Security;
 
 /**
  * LoginContext
@@ -127,7 +129,10 @@ class LoginContext implements Context
         /** @var Member $member */
         $member = Member::get()->filter('Email', $id)->First();
         assertNotNull($member);
-        assertTrue($member->checkPassword($password)->isValid());
+        $authenticators = Security::singleton()->getApplicableAuthenticators(Authenticator::CHECK_PASSWORD);
+        foreach ($authenticators as $authenticator) {
+            assertTrue($authenticator->checkPassword($member, $password)->isValid());
+        }
     }
 
     /**

@@ -149,10 +149,8 @@ class Extension implements ExtensionInterface
             new Reference(SuiteExtension::REGISTRY_ID)
         ]);
         $definition->addTag(CliExtension::CONTROLLER_TAG, ['priority' => 9999]);
-        $container->setDefinition(CliExtension::CONTROLLER_TAG . '.sslocator', $definition);
+        $container->setDefinition(CliExtension::CONTROLLER_TAG . '.suite', $definition);
     }
-
-
 
     /**
      * Loads suite bootstrap controller.
