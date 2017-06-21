@@ -57,7 +57,7 @@ class LoginContext implements Context
     public function stepIAmNotLoggedIn()
     {
         $c = $this->getMainContext();
-        $this->getMainContext()->getSession()->visit($c->joinUrlParts($c->getBaseUrl(), 'Security/logout'));
+        $this->getMainContext()->getSession()->visit($c->joinUrlParts($c->getBaseUrl(), Security::logout_url()));
     }
 
     /**
@@ -105,6 +105,16 @@ class LoginContext implements Context
         $page = $this->getMainContext()->getSession()->getPage();
         $loginForm = $page->find('css', '#MemberLoginForm_LoginForm');
         assertNotNull($loginForm, 'I should see a log-in form');
+    }
+
+    /**
+     * @Given /^I should see a log-out form$/
+     */
+    public function stepIShouldSeeALogOutForm()
+    {
+        $page = $this->getMainContext()->getSession()->getPage();
+        $logoutForm = $page->find('css', '#LogoutForm_Form');
+        assertNotNull($logoutForm, 'I should see a log-out form');
     }
 
     /**
