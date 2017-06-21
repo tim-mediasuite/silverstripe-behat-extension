@@ -57,7 +57,21 @@ class LoginContext implements Context
     public function stepIAmNotLoggedIn()
     {
         $c = $this->getMainContext();
-        $this->getMainContext()->getSession()->visit($c->joinUrlParts($c->getBaseUrl(), Security::logout_url()));
+
+        // We're missing a security token, so we'll be presented with a form
+        $this->getMainContext()->getSession()->visit($c->joinUrlParts($c->getBaseUrl(), 'Security/logout/'));
+
+        $page = $this->getMainContext()->getSession()->getPage();
+        $form = $page->findById('LogoutForm_Form');
+        assertNotNull($form, 'Logout form not found');
+
+        $submitButton = $form->find('css', '[type=submit]');
+        $securityID = $form->find('css', '[name=SecurityID]');
+
+        assertNotNull($submitButton, 'Submit button on logout form not found');
+        assertNotNull($securityID, 'CSRF token not found');
+
+        $submitButton->press();
     }
 
     /**
