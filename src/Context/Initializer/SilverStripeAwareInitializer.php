@@ -65,13 +65,6 @@ class SilverStripeAwareInitializer implements ContextInitializer
      */
     public function __construct()
     {
-        file_put_contents('php://stdout', 'Bootstrapping' . PHP_EOL);
-
-        SapphireTest::start();
-
-        // Remove the error handler so that PHPUnit can add its own
-        restore_error_handler();
-
         file_put_contents('php://stdout', "Creating test session environment" . PHP_EOL);
 
         $testEnv = TestSessionEnvironment::singleton();

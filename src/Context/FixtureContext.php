@@ -18,6 +18,7 @@ use SilverStripe\Dev\FixtureBlueprint;
 use SilverStripe\Dev\FixtureFactory;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\Dev\YamlFixture;
+use SilverStripe\ORM\Connect\TempDatabase;
 use SilverStripe\ORM\DB;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Versioned\Versioned;
@@ -47,6 +48,13 @@ class FixtureContext implements Context
     protected $filesPath;
 
     /**
+     * Temp database helper
+     *
+     * @var TempDatabase
+     */
+    protected $tempDatabase;
+
+    /**
      * @var String Tracks all files and folders created from fixtures, for later cleanup.
      */
     protected $createdFilesPaths = array();
@@ -66,6 +74,7 @@ class FixtureContext implements Context
             throw new InvalidArgumentException("filesPath is required");
         }
         $this->setFilesPath($filesPath);
+        $this->setTempDatabase(new TempDatabase());
     }
 
     /**
@@ -126,13 +135,31 @@ class FixtureContext implements Context
     }
 
     /**
+     * @return TempDatabase
+     */
+    public function getTempDatabase()
+    {
+        return $this->tempDatabase;
+    }
+
+    /**
+     * @param TempDatabase $database
+     * @return $this
+     */
+    public function setTempDatabase(TempDatabase $database)
+    {
+        $this->tempDatabase = $database;
+        return $this;
+    }
+
+    /**
      * @BeforeScenario @database-defaults
      *
      * @param BeforeScenarioScope $event
      */
     public function beforeDatabaseDefaults(BeforeScenarioScope $event)
     {
-        SapphireTest::empty_temp_db();
+        $this->getTempDatabase()->clearAllData();
         DB::get_conn()->quiet();
         $dataClasses = ClassInfo::subclassesFor(DataObject::class);
         array_shift($dataClasses);
@@ -147,7 +174,7 @@ class FixtureContext implements Context
      */
     public function afterResetDatabase(AfterScenarioScope $event)
     {
-        SapphireTest::empty_temp_db();
+        $this->getTempDatabase()->clearAllData();
     }
 
     /**
