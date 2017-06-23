@@ -51,9 +51,9 @@ Now get the latest Selenium2 server (requires [Java](http://www.oracle.com/techn
 
 	composer require --dev se/selenium-server-standalone:"2.x@stable"
 
-Download the latest [Firefox ESR](https://www.mozilla.org/en-US/firefox/organizations/all/) (Extended Support Release).
-It might be older than your currently installed Firefox.
-It's important to have a browser that's [supported by Selenium-Webdriver](http://docs.seleniumhq.org/docs/01_introducing_selenium.jsp#selenium-webdriver)
+Download [Firefox 31.0 ESR](https://ftp.mozilla.org/pub/firefox/releases/31.8.0esr/) (Extended Support Release).
+This version is older than your currently installed Firefox.
+It's important to have a browser that's [supported by Selenium-Webdriver](http://docs.seleniumhq.org/docs/01_introducing_selenium.jsp#selenium-webdriver). Even newer Firefox ESR versions are likely to break with the Selenium version we're running.
 
 Now install the SilverStripe project as usual by opening it in a browser and following the instructions.
 Protip: You can skip this step by using `[SS_DATABASE_CHOOSE_NAME]` in a global
