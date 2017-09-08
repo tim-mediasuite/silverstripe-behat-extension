@@ -109,6 +109,17 @@ class LoginContext implements Context
         $emailField->setValue($email);
         $passwordField->setValue($password);
         $submitButton->press();
+
+        // Wait 100 ms
+        $this->getMainContext()->getSession()->wait(100);
+
+        // In case of login error, throw exception
+        // E.g. 'Your session has expired. Please re-submit the form.'
+        // This will allow @retry
+        $page = $this->getMainContext()->getSession()->getPage();
+        $message = $page->find('css', '.message.error');
+        $error = $message ? $message->getText() : null;
+        assertNull($message, 'Could not log in with user ' . $email . '. Error: "' . $error. '""');
     }
 
     /**

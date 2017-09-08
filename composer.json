@@ -26,10 +26,10 @@
         "behat/behat": "^3.2",
         "behat/mink": "^1.7",
         "behat/mink-extension": "^2.1",
-        "behat/mink-selenium2-driver": "^1.3",
+        "silverstripe/mink-framework-web-driver": "^1",
         "symfony/dom-crawler": "^3",
-        "silverstripe/testsession": "^2.0.0@alpha",
-        "silverstripe/framework": "^4@dev",
+        "silverstripe/testsession": "^2",
+        "silverstripe/framework": "^4",
         "symfony/finder": "^3.2"
     },
     "autoload": {
