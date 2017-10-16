@@ -3,6 +3,7 @@
 namespace SilverStripe\BehatExtension\Compiler;
 
 use InvalidArgumentException;
+use SilverStripe\Core\Environment;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 
@@ -23,7 +24,7 @@ class MinkExtensionBaseUrlPass implements CompilerPassInterface
     public function process(ContainerBuilder $container)
     {
         // Set url from environment
-        $baseURL = getenv('SS_BASE_URL');
+        $baseURL = Environment::getEnv('SS_BASE_URL');
         if (!$baseURL) {
             throw new InvalidArgumentException(
                 '"base_url" not configured. Please specify it in your .env config with SS_BASE_URL'

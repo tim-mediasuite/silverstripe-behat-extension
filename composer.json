@@ -40,11 +40,7 @@
   "autoload-dev": {
     "psr-4": {
       "SilverStripe\\BehatExtension\\Tests\\": "tests/php/"
-    },
-    "classmap": [
-      "framework",
-      "vendor/phpunit/phpunit"
-    ]
+    }
   },
   "extra": {
     "branch-alias": {
