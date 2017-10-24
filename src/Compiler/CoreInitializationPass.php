@@ -7,6 +7,7 @@ use SilverStripe\Control\Controller;
 use SilverStripe\Control\HTTPApplication;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Core\CoreKernel;
+use SilverStripe\Core\Environment;
 use SilverStripe\Core\Manifest\ModuleLoader;
 use SilverStripe\ORM\DataObject;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -28,8 +29,8 @@ class CoreInitializationPass implements CompilerPassInterface
         file_put_contents('php://stdout', 'Bootstrapping' . PHP_EOL);
 
         // Connect to database and build manifest
-        if (!getenv('SS_ENVIRONMENT_TYPE')) {
-            putenv('SS_ENVIRONMENT_TYPE=dev');
+        if (!Environment::getEnv('SS_ENVIRONMENT_TYPE')) {
+            Environment::setEnv('SS_ENVIRONMENT_TYPE', 'dev');
         }
 
         // Include bootstrap file

@@ -10,8 +10,10 @@ use Behat\Mink\Driver\Selenium2Driver;
 use Behat\Mink\Exception\UnsupportedDriverActionException;
 use Behat\Mink\Exception\ElementNotFoundException;
 use InvalidArgumentException;
+use SilverStripe\BehatExtension\Utility\TestMailer;
 use SilverStripe\CMS\Model\SiteTree;
 use SilverStripe\Core\ClassInfo;
+use SilverStripe\Core\Environment;
 use SilverStripe\Core\Resettable;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\TestSession\TestSessionEnvironment;
@@ -255,7 +257,7 @@ abstract class SilverStripeContext extends MinkContext implements SilverStripeAw
             $this->testSessionEnvironment->loadFixtureIntoDb($fixtureFile);
         }
 
-        if ($screenSize = getenv('BEHAT_SCREEN_SIZE')) {
+        if ($screenSize = Environment::getEnv('BEHAT_SCREEN_SIZE')) {
             list($screenWidth, $screenHeight) = explode('x', $screenSize);
             $this->getSession()->resizeWindow((int)$screenWidth, (int)$screenHeight);
         } else {
@@ -282,11 +284,11 @@ abstract class SilverStripeContext extends MinkContext implements SilverStripeAw
     public function getTestSessionState()
     {
         $extraParams = array();
-        parse_str(getenv('TESTSESSION_PARAMS'), $extraParams);
+        parse_str(Environment::getEnv('TESTSESSION_PARAMS'), $extraParams);
         return array_merge(
             array(
                 'database' => $this->databaseName,
-                'mailer' => 'SilverStripe\BehatExtension\Utility\TestMailer',
+                'mailer' => TestMailer::class,
             ),
             $extraParams
         );
