@@ -526,7 +526,10 @@ class FixtureContext implements Context
         }
 
         /** @var Member $member */
-        $member = $this->getFixtureFactory()->createObject(Member::class, $id);
+        $member = $this->getFixtureFactory()->get(Member::class, $id);
+        if (!$member) {
+            $member = $this->getFixtureFactory()->createObject(Member::class, $id);
+        }
         $member->Groups()->add($group);
     }
 
@@ -557,7 +560,10 @@ class FixtureContext implements Context
         }
 
         /** @var Member $member */
-        $member = $this->getFixtureFactory()->createObject(Member::class, $id, $fields);
+        $member = $this->getFixtureFactory()->get(Member::class, $id);
+        if (!$member) {
+            $member = $this->getFixtureFactory()->createObject(Member::class, $id, $fields);
+        }
         $member->Groups()->add($group);
     }
 
