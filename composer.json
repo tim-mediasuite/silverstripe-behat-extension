@@ -42,6 +42,11 @@
             "SilverStripe\\BehatExtension\\Tests\\": "tests/php/"
         }
     },
+    "extra": {
+        "branch-alias": {
+            "3.x-dev": "3.1.x-dev"
+        }
+    },
     "scripts": {
         "lint": "phpcs --standard=PSR2 -n src/ tests/php/"
     },
