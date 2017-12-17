@@ -8,10 +8,11 @@ use Behat\Mink\Session;
 use Behat\Mink\Mink;
 use Behat\Mink\Driver\DriverInterface;
 use Behat\Mink\Element\Element;
+use PHPUnit\Framework\TestCase;
 use SilverStripe\BehatExtension\Tests\SilverStripeContextTest\FeatureContext;
 use SilverStripe\Dev\SapphireTest;
 
-class SilverStripeContextTest extends \PHPUnit_Framework_TestCase
+class SilverStripeContextTest extends TestCase
 {
 
     protected $backupGlobals = false;
