@@ -1,0 +1,20 @@
+#!/bin/sh
+echo "setting up /artifacts"
+mkdir -p artifacts
+
+echo "starting chromedriver"
+chromedriver &> artifacts/chromedriver.log 2> artifacts/chromedriver-error.log &
+cd_pid=$!
+
+echo "starting webserver"
+vendor/bin/serve &> artifacts/serve.log 2> artifacts/serve-error.log &
+ws_pid=$!
+
+echo "starting behat"
+vendor/bin/behat "$@"
+
+echo "killing webserver (PID: $ws_pid)"
+pkill -TERM -P $ws_pid &> /dev/null
+
+echo "killing chromedriver (PID: $cd_pid)"
+kill -9 $cd_pid &> /dev/null

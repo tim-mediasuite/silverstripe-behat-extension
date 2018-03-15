@@ -47,6 +47,9 @@
             "3.x-dev": "3.1.x-dev"
         }
     },
+    "bin": [
+        "bin/behat-ss"
+    ],
     "scripts": {
         "lint": "phpcs --standard=PSR2 -n src/ tests/php/"
     },
