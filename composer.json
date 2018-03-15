@@ -28,7 +28,7 @@
         "behat/mink-extension": "^2.1",
         "silverstripe/mink-framework-web-driver": "^1",
         "symfony/dom-crawler": "^3",
-        "silverstripe/testsession": "^2",
+        "silverstripe/testsession": "^2.1",
         "silverstripe/framework": "^4",
         "symfony/finder": "^3.2"
     },
