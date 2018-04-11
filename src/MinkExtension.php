@@ -4,6 +4,7 @@ namespace SilverStripe\BehatExtension;
 
 use Behat\MinkExtension\ServiceContainer\MinkExtension as BaseMinkExtension;
 use SilverStripe\BehatExtension\Compiler\MinkExtensionBaseUrlPass;
+use SilverStripe\MinkFacebookWebDriver\FacebookFactory;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 /**
@@ -14,6 +15,12 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
  */
 class MinkExtension extends BaseMinkExtension
 {
+    public function __construct()
+    {
+        parent::__construct();
+        $this->registerDriverFactory(new FacebookFactory());
+    }
+
     public function process(ContainerBuilder $container)
     {
         parent::process($container);

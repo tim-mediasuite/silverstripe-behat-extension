@@ -4,17 +4,18 @@ namespace SilverStripe\BehatExtension\Context;
 
 use Behat\Behat\Hook\Scope\BeforeScenarioScope;
 use Behat\Mink\Element\NodeElement;
+use Behat\Mink\Exception\ElementNotFoundException;
+use Behat\Mink\Exception\UnsupportedDriverActionException;
 use Behat\Mink\Selector\Xpath\Escaper;
 use Behat\MinkExtension\Context\MinkContext;
-use Behat\Mink\Driver\Selenium2Driver;
-use Behat\Mink\Exception\UnsupportedDriverActionException;
-use Behat\Mink\Exception\ElementNotFoundException;
 use InvalidArgumentException;
 use SilverStripe\BehatExtension\Utility\TestMailer;
 use SilverStripe\CMS\Model\SiteTree;
 use SilverStripe\Core\ClassInfo;
+use SilverStripe\Core\Convert;
 use SilverStripe\Core\Environment;
 use SilverStripe\Core\Resettable;
+use SilverStripe\MinkFacebookWebDriver\FacebookWebDriver;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\TestSession\TestSessionEnvironment;
 use Symfony\Component\CssSelector\Exception\SyntaxErrorException;
@@ -383,7 +384,7 @@ abstract class SilverStripeContext extends MinkContext implements SilverStripeAw
     public function canIntercept()
     {
         $driver = $this->getSession()->getDriver();
-        if ($driver instanceof Selenium2Driver) {
+        if ($driver instanceof FacebookWebDriver) {
             return false;
         }
 
@@ -411,7 +412,18 @@ abstract class SilverStripeContext extends MinkContext implements SilverStripeAw
             /** @var NodeElement $node */
             foreach ($nodes as $node) {
                 if ($node->isVisible()) {
-                    $node->setValue($value);
+                    // Work around for https://github.com/FluentLenium/FluentLenium/issues/129
+                    // Otherwise "Element must be user-editable in order to clear it"
+                    $type = $node->getAttribute('type');
+                    $id = $node->getAttribute('id');
+                    if ($type === 'date' && $id) {
+                        $jsValue = Convert::raw2js($value);
+                        $this->getSession()->getDriver()->executeScript(
+                            "document.getElementById(\"{$id}\").value = \"{$jsValue}\";"
+                        );
+                    } else {
+                        $node->setValue($value);
+                    }
                     return;
                 }
             }
