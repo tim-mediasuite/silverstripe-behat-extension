@@ -342,7 +342,7 @@ class FixtureContext extends BehatContext
 				\Versioned::reading_stage('Live');
 				$clone = clone $obj;
 				$clone->delete();
-				\Versioned::reading_stage($oldMode);
+				\Versioned::set_reading_mode($oldMode);
 				break;
 			case 'deleted':
 				$obj->delete();

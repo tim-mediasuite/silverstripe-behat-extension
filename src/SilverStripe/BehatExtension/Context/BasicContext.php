@@ -843,7 +843,7 @@ JS;
 	public function iWaitXUntilISee($wait, $selector) {
 		$page = $this->getSession()->getPage();
 
-		$this->spin(function($page) use ($page, $selector){
+		$this->spin(function() use ($page, $selector){
 			$element = $page->find('css', $selector);
 
 			if(empty($element)) {
@@ -864,7 +864,7 @@ JS;
      */
     public function iWaitUntilISee($selector) {
         $page = $this->getSession()->getPage();
-        $this->spin(function($page) use ($page, $selector){
+        $this->spin(function() use ($page, $selector){
             $element = $page->find('css', $selector);
             if(empty($element)){
                 return false;
@@ -885,7 +885,7 @@ JS;
     public function iWaitUntilISeeText($text){
         $page = $this->getSession()->getPage();
         $session = $this->getSession();
-        $this->spin(function($page) use ($page, $session, $text) {
+        $this->spin(function() use ($page, $session, $text) {
             $element = $page->find(
                 'xpath',
                 $session->getSelectorsHandler()->selectorToXpath("xpath", ".//*[contains(text(), '$text')]")
