@@ -102,6 +102,22 @@ This will start a Firefox browser by default. Other browsers and profiles can be
 
 For example, if you want to start a Chrome Browser you can following the instructions provided [here](docs/chrome-behat.md).
 
+### Running with stand-alone command
+
+If running with `silverstripe/serve` and `chromedriver`, you can also use the following command
+which will automatically start and stop these services for individual tests.
+
+    vendor/bin/behat-ss @framework
+
+This automates:
+ - starting server
+ - starting chromedriver
+ - running behat
+ - shutting down chromedriver
+ - shutting down server
+
+Make sure you set `SS_BASE_URL` to `http://localhost:8080` in `.env`
+
 ## Tutorials
 
  * [Tutorial: Testing Form Submissions](docs/tutorial.md)

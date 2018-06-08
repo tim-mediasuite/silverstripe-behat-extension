@@ -8,16 +8,19 @@ use Behat\Behat\Hook\Scope\AfterScenarioScope;
 use Behat\Behat\Hook\Scope\AfterStepScope;
 use Behat\Behat\Hook\Scope\BeforeStepScope;
 use Behat\Behat\Hook\Scope\StepScope;
-use Behat\Mink\Driver\Selenium2Driver;
 use Behat\Mink\Element\NodeElement;
 use Behat\Mink\Session;
 use Behat\Testwork\Tester\Result\TestResult;
 use Exception;
+use Facebook\WebDriver\Exception\WebDriverException;
+use Facebook\WebDriver\WebDriver;
+use Facebook\WebDriver\WebDriverAlert;
+use Facebook\WebDriver\WebDriverExpectedCondition;
+use InvalidArgumentException;
 use SilverStripe\Assets\File;
 use SilverStripe\Assets\Filesystem;
 use SilverStripe\BehatExtension\Utility\StepHelper;
-use WebDriver\Exception as WebDriverException;
-use WebDriver\Session as WebDriverSession;
+use SilverStripe\MinkFacebookWebDriver\FacebookWebDriver;
 
 /**
  * BasicContext
@@ -248,7 +251,7 @@ JS;
 
     /**
      * Take screenshot when step fails.
-     * Works only with Selenium2Driver.
+     * Works only with FacebookWebDriver.
      *
      * @AfterStep
      * @param AfterStepScope $event
@@ -282,7 +285,7 @@ JS;
                     try {
                         // Navigate away triggered by reloading the page
                         $this->getSession()->reload();
-                        $this->getWebDriverSession()->accept_alert();
+                        $this->getExpectedAlert()->accept();
                     } catch (WebDriverException $e) {
                         // no-op, alert might not be present
                     }
@@ -316,8 +319,8 @@ JS;
     {
         // Validate driver
         $driver = $this->getSession()->getDriver();
-        if (!($driver instanceof Selenium2Driver)) {
-            file_put_contents('php://stdout', 'ScreenShots are only supported for Selenium2Driver: skipping');
+        if (!($driver instanceof FacebookWebDriver)) {
+            file_put_contents('php://stdout', 'ScreenShots are only supported for FacebookWebDriver: skipping');
             return;
         }
 
@@ -350,8 +353,8 @@ JS;
         }
 
         $path = sprintf('%s/%s_%d.png', $path, basename($feature->getFile()), $step->getLine());
-        $screenshot = $driver->getWebDriverSession()->screenshot();
-        file_put_contents($path, base64_decode($screenshot));
+        $screenshot = $driver->getScreenshot();
+        file_put_contents($path, $screenshot);
         file_put_contents('php://stderr', sprintf('Saving screenshot into %s' . PHP_EOL, $path));
     }
 
@@ -521,10 +524,7 @@ JS;
      */
     public function iSeeTheDialogText($expected)
     {
-        $session = $this->getSession();
-        /** @var Selenium2Driver $driver */
-        $driver = $session->getDriver();
-        $text = $driver->getWebDriverSession()->getAlert_text();
+        $text = $this->getExpectedAlert()->getText();
         assertContains($expected, $text);
     }
 
@@ -534,7 +534,24 @@ JS;
      */
     public function iTypeIntoTheDialog($data)
     {
-        $this->getWebDriverSession()->postAlert_text([ 'text' => $data ]);
+        $this->getExpectedAlert()
+            ->sendKeys($data)
+            ->accept();
+    }
+
+    /**
+     * Wait for alert to appear, and return handle
+     *
+     * @return WebDriverAlert
+     */
+    protected function getExpectedAlert()
+    {
+        $session = $this->getWebDriverSession();
+        $session->wait()->until(
+            WebDriverExpectedCondition::alertIsPresent(),
+            "Alert is expected"
+        );
+        return $session->switchTo()->alert();
     }
 
     /**
@@ -542,7 +559,12 @@ JS;
      */
     public function iConfirmTheDialog()
     {
-        $this->getWebDriverSession()->accept_alert();
+        $session = $this->getWebDriverSession();
+        $session->wait()->until(
+            WebDriverExpectedCondition::alertIsPresent(),
+            "Alert is expected"
+        );
+        $session->switchTo()->alert()->accept();
         $this->handleAjaxTimeout();
     }
 
@@ -551,23 +573,23 @@ JS;
      */
     public function iDismissTheDialog()
     {
-        $this->getWebDriverSession()->dismiss_alert();
+        $this->getExpectedAlert()->dismiss();
         $this->handleAjaxTimeout();
     }
 
     /**
      * Get Selenium webdriver session.
-     * Note: Will fail if current driver isn't Selenium2Driver
+     * Note: Will fail if current driver isn't FacebookWebDriver
      *
-     * @return WebDriverSession
+     * @return WebDriver
      */
     protected function getWebDriverSession()
     {
         $driver = $this->getSession()->getDriver();
-        if (! $driver instanceof Selenium2Driver) {
-            throw new \InvalidArgumentException("Not supported for non-selenium2 drivers");
+        if (! $driver instanceof FacebookWebDriver) {
+            throw new InvalidArgumentException("Only supported for FacebookWebDriver");
         }
-        return $driver->getWebDriverSession();
+        return $driver->getWebDriver();
     }
 
     /**
@@ -612,7 +634,7 @@ JS;
         }
 
         if (!$parent) {
-            throw new \InvalidArgumentException(sprintf('Input group with label "%s" cannot be found', $labelText));
+            throw new InvalidArgumentException(sprintf('Input group with label "%s" cannot be found', $labelText));
         }
 
         /** @var NodeElement $option */
@@ -632,7 +654,7 @@ JS;
                 }
 
                 if (!$input) {
-                    throw new \InvalidArgumentException(sprintf('Input "%s" cannot be found', $value));
+                    throw new InvalidArgumentException(sprintf('Input "%s" cannot be found', $value));
                 }
 
                 $this->getSession()->getDriver()->click($input->getXPath());
@@ -649,6 +671,7 @@ JS;
     {
         fwrite(STDOUT, "\033[s    \033[93m[Breakpoint] Press \033[1;93m[RETURN]\033[0;93m to continue...\033[0m");
         while (fgets(STDIN, 1024) == '') {
+            // noop
         }
         fwrite(STDOUT, "\033[u");
 
@@ -669,7 +692,7 @@ JS;
     {
         $timestamp = strtotime($val);
         if (!$timestamp) {
-            throw new \InvalidArgumentException(sprintf(
+            throw new InvalidArgumentException(sprintf(
                 "Can't resolve '%s' into a valid datetime value",
                 $val
             ));
@@ -691,7 +714,7 @@ JS;
     {
         $timestamp = strtotime($val);
         if (!$timestamp) {
-            throw new \InvalidArgumentException(sprintf(
+            throw new InvalidArgumentException(sprintf(
                 "Can't resolve '%s' into a valid datetime value",
                 $val
             ));
@@ -713,7 +736,7 @@ JS;
     {
         $timestamp = strtotime($val);
         if (!$timestamp) {
-            throw new \InvalidArgumentException(sprintf(
+            throw new InvalidArgumentException(sprintf(
                 "Can't resolve '%s' into a valid datetime value",
                 $val
             ));
@@ -1150,7 +1173,7 @@ JS;
 
         $id = $el->getAttribute('id');
         if (empty($id)) {
-            throw new \InvalidArgumentException('Element requires an "id" attribute');
+            throw new InvalidArgumentException('Element requires an "id" attribute');
         }
 
         $js = sprintf("document.getElementById('%s').scrollIntoView(true);", $id);
@@ -1173,7 +1196,7 @@ JS;
 
         $id = $el->getAttribute('id');
         if (empty($id)) {
-            throw new \InvalidArgumentException('Element requires an "id" attribute');
+            throw new InvalidArgumentException('Element requires an "id" attribute');
         }
 
         $js = sprintf("document.getElementById('%s').scrollIntoView(true);", $id);
