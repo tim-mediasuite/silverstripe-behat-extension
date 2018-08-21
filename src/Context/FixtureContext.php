@@ -12,19 +12,23 @@ use InvalidArgumentException;
 use SilverStripe\Assets\Folder;
 use SilverStripe\Assets\Storage\AssetStore;
 use SilverStripe\Core\ClassInfo;
+use SilverStripe\Core\Extensible;
+use SilverStripe\Core\Extension;
 use SilverStripe\Core\Injector\Injector;
+use SilverStripe\Core\Manifest\ModuleLoader;
+use SilverStripe\Core\Manifest\ModuleManifest;
 use SilverStripe\Dev\BehatFixtureFactory;
 use SilverStripe\Dev\FixtureBlueprint;
 use SilverStripe\Dev\FixtureFactory;
-use SilverStripe\Dev\SapphireTest;
 use SilverStripe\Dev\YamlFixture;
 use SilverStripe\ORM\Connect\TempDatabase;
-use SilverStripe\ORM\DB;
+use SilverStripe\ORM\DataExtension;
 use SilverStripe\ORM\DataObject;
-use SilverStripe\Versioned\Versioned;
+use SilverStripe\ORM\DB;
 use SilverStripe\Security\Group;
 use SilverStripe\Security\Member;
 use SilverStripe\Security\Permission;
+use SilverStripe\Versioned\Versioned;
 
 /**
  * Context used to create fixtures in the SilverStripe ORM.
@@ -55,9 +59,14 @@ class FixtureContext implements Context
     protected $tempDatabase;
 
     /**
-     * @var String Tracks all files and folders created from fixtures, for later cleanup.
+     * @var string[] Tracks all files and folders created from fixtures, for later cleanup.
      */
     protected $createdFilesPaths = array();
+
+    /**
+     * @var string[] Tracks any config files that have been activated as part of a scenario
+     */
+    protected $activatedConfigFiles = array();
 
     /**
      * @var array Stores the asset tuples.
@@ -632,6 +641,66 @@ class FixtureContext implements Context
         $this->getMainContext()->getSession()->visit($this->getMainContext()->locatePath($link));
     }
 
+    /**
+     * @param $extension
+     * @param $class
+     *
+     * @Given I add an extension :extension to the :class class
+     */
+    public function iAddAnExtensionToTheClass($extension, $class)
+    {
+        // Validate the extension
+        assertTrue(
+            class_exists($extension) && is_subclass_of($extension, Extension::class),
+            'Given extension does not extend Extension'
+        );
+
+        // Add the extension to the CLI context
+        /** @var Extensible $targetClass */
+        $targetClass = $this->convertTypeToClass($class);
+        $targetClass::add_extension($extension);
+
+        // Write config for this extension too...
+        $snakedExtension = strtolower(str_replace('\\', '-', $extension));
+        $config = <<<YAML
+---
+Name: testonly-enable-extension-$snakedExtension
+---
+$class:
+  extensions:
+    - $extension
+YAML;
+
+        $filename = 'enable-' . $snakedExtension . '.yml';
+        $destPath = $this->getDestinationConfigFolder($filename);
+        file_put_contents($destPath, $config);
+
+        // Remember to cleanup...
+        $this->activatedConfigFiles[] = $destPath;
+
+        // Flush website. We'll need to dev/build too if it's a DataExtension
+        if (is_subclass_of($extension, DataExtension::class)) {
+            $this->getMainContext()->visit('/dev/build?flush');
+        } else {
+            $this->getMainContext()->visit('/flush');
+        }
+    }
+
+    /**
+     * Get the destination folder for config and assert the given file name doesn't exist within in.
+     *
+     * @param $filename
+     * @return string
+     */
+    protected function getDestinationConfigFolder($filename)
+    {
+        $project = ModuleManifest::config()->get('project') ?: 'mysite';
+        $mysite = ModuleLoader::getModule($project);
+        assertNotNull($mysite, 'Project exists');
+        $destPath = $mysite->getResource("_config/{$filename}")->getPath();
+        assertFileNotExists($destPath, "Config file {$filename} hasn't aleady been loaded");
+        return $destPath;
+    }
 
     /**
      * Checks that a file or folder exists in the webroot.
@@ -712,6 +781,19 @@ class FixtureContext implements Context
                 [$date, $record->ID]
             );
         }
+    }
+
+    /**
+     * Clean up all config files after scenario
+     *
+     * @AfterScenario
+     * @param AfterScenarioScope $event
+     */
+    public function afterResetConfig(AfterScenarioScope $event)
+    {
+        $this->clearConfigFiles();
+        // Flush
+        $this->getMainContext()->visit('/?flush');
     }
 
     /**
@@ -866,5 +948,28 @@ class FixtureContext implements Context
             $paths[0] = '/' . $paths[0];
         }
         return join('/', $paths);
+    }
+
+    protected function clearConfigFiles()
+    {
+        // No files to cleanup
+        if (empty($this->activatedConfigFiles)) {
+            return;
+        }
+
+        foreach ($this->activatedConfigFiles as $configFile) {
+            if (file_exists($configFile)) {
+                unlink($configFile);
+            }
+        }
+        $this->activatedConfigFiles = [];
+    }
+
+    /**
+     * Catch situations where failed scenarios and early exiting would prevent cleanup.
+     */
+    public function __destruct()
+    {
+        $this->clearConfigFiles();
     }
 }
