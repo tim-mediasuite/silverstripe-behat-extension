@@ -682,7 +682,7 @@ YAML;
         if (is_subclass_of($extension, DataExtension::class)) {
             $this->getMainContext()->visit('/dev/build?flush');
         } else {
-            $this->getMainContext()->visit('/flush');
+            $this->getMainContext()->visit('/?flush');
         }
     }
 
