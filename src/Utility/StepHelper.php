@@ -2,11 +2,14 @@
 
 namespace SilverStripe\BehatExtension\Utility;
 
+use Behat\Behat\Hook\Scope\ScenarioScope;
 use Behat\Behat\Hook\Scope\StepScope;
 use Behat\Gherkin\Node\FeatureNode;
 use Behat\Gherkin\Node\NodeInterface;
 use Behat\Gherkin\Node\ScenarioInterface;
+use Behat\Gherkin\Node\TaggedNodeInterface;
 use \Exception;
+use InvalidArgumentException;
 
 /**
  * Helpers for working with steps
@@ -65,22 +68,35 @@ trait StepHelper
     /**
      * Check if a step has a given tag
      *
-     * @param StepScope $event
+     * @param StepScope|ScenarioScope $event
      * @param string $tag
      * @return bool
      */
-    protected function stepHasTag(StepScope $event, $tag)
+    protected function stepHasTag($event, $tag)
     {
-        // Check feature
-        $feature = $event->getFeature();
-        if ($feature && $feature->hasTag($tag)) {
-            return true;
+        $checks = [];
+        if ($event instanceof StepScope) {
+            $checks[] = $feature = $event->getFeature();
+            $checks[] = $this->getStepScenario($feature, $event->getStep());
+        } elseif ($event instanceof ScenarioScope) {
+            $checks[] = $event->getFeature();
+            $checks[] = $event->getScenario();
+        } else {
+            throw new InvalidArgumentException(sprintf(
+                '%s expected an instance of either %s or %s. Got %s instead',
+                __METHOD__,
+                StepScope::class,
+                ScenarioScope::class,
+                is_object($event) ? sprintf('an instance of %s', get_class($event)) : gettype($event)
+            ));
         }
-        // Check scenario
-        $scenario = $this->getStepScenario($feature, $event->getStep());
-        if ($scenario && $scenario->hasTag($tag)) {
-            return true;
+
+        foreach ($checks as $check) {
+            if ($check instanceof TaggedNodeInterface && $check->hasTag($tag)) {
+                return true;
+            }
         }
+
         return false;
     }
 }
