@@ -277,9 +277,11 @@ JS;
      */
     public function closeModalDialog(AfterScenarioScope $event)
     {
+        $expectsUnsavedChangesModal = $this->stepHasTag($event, 'unsavedChanges');
+        
         try {
             // Only for failed tests on CMS page
-            if ($event->getTestResult()->getResultCode() === TestResult::FAILED) {
+            if ($expectsUnsavedChangesModal || $event->getTestResult()->getResultCode() === TestResult::FAILED) {
                 $cmsElement = $this->getSession()->getPage()->find('css', '.cms');
                 if ($cmsElement) {
                     try {
