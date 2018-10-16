@@ -42,11 +42,7 @@
             "SilverStripe\\BehatExtension\\Tests\\": "tests/php/"
         }
     },
-    "extra": {
-        "branch-alias": {
-            "3.x-dev": "3.1.x-dev"
-        }
-    },
+    "extra": [],
     "bin": [
         "bin/behat-ss"
     ],
