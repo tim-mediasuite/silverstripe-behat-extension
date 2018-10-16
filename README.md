@@ -1,6 +1,8 @@
 # SilverStripe Integration for Behat
 
 [![Build Status](https://travis-ci.org/silverstripe-labs/silverstripe-behat-extension.svg?branch=master)](https://travis-ci.org/silverstripe-labs/silverstripe-behat-extension)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/silverstripe/silverstripe-behat-extension/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/silverstripe/silverstripe-behat-extension/?branch=master)
+[![SilverStripe supported module](https://img.shields.io/badge/silverstripe-supported-0071C4.svg)](https://www.silverstripe.org/software/addons/silverstripe-commercially-supported-module-list/)
 
 ## Overview
 
@@ -8,7 +10,7 @@
 Because it primarily interacts with your website through a browser,
 you don't need any specific integration tools to get it going with
 a basic SilverStripe website, simply follow the
-[standard Behat usage instructions](http://docs.behat.org/).
+[standard Behat usage instructions](http://docs.behat.org/en/latest/user_guide.html).
 
 This extension comes in handy if you want to go beyond
 interacting with an existing website and database,
@@ -45,48 +47,28 @@ Skip this step if adding the module to an existing project.
 Switch to the newly created webroot, and add the SilverStripe Behat extension.
 
 	cd my-test-project
-	composer require --dev silverstripe/behat-extension:"@stable"
+	composer require --dev silverstripe/behat-extension
 
-Now get the latest Selenium2 server (requires [Java](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)):
+Download the standalone [Google Chrome WebDriver](http://chromedriver.storage.googleapis.com/index.html?path=2.8/)
 
-	composer require --dev se/selenium-server-standalone:"2.x@stable"
-
-Download [Firefox 31.0 ESR](https://ftp.mozilla.org/pub/firefox/releases/31.8.0esr/) (Extended Support Release).
-This version is older than your currently installed Firefox.
-It's important to have a browser that's [supported by Selenium-Webdriver](http://docs.seleniumhq.org/docs/01_introducing_selenium.jsp#selenium-webdriver). Even newer Firefox ESR versions are likely to break with the Selenium version we're running.
 
 Now install the SilverStripe project as usual by opening it in a browser and following the instructions.
 Protip: You can skip this step by using `[SS_DATABASE_CHOOSE_NAME]` in a global
-[`_ss_environment.php`](http://doc.silverstripe.org/framework/en/topics/environment-management)
-file one level above the webroot.
+[`.env`](https://docs.silverstripe.org/en/getting_started/environment_management/) file one level above the webroot.
 
-Unless you have [`$_FILE_TO_URL_MAPPING`](http://doc.silverstripe.org/framework/en/topics/commandline#configuration)
-set up, you also need to specify the URL for your webroot. Either add it to the existing `behat.yml` configuration file
+Unless you have [`SS_BASE_URL`](http://doc.silverstripe.org/framework/en/topics/commandline#configuration) set up, 
+you also need to specify the URL for your webroot. Either add it to the existing `behat.yml` configuration file
 in your project root, or set is as an environment variable in your terminal session:
 
 	export BEHAT_PARAMS="extensions[SilverStripe\BehatExtension\MinkExtension][base_url]=http://localhost/"
 
 ## Usage
 
-### Prevent Firefox from Automatically Updating
-
-The moment you open Firefox, it's going to try and update itself out of the stone age. To prevent this, open a new tab and go to `about:config`. There, change the following settings to `false`:
-
-- `app.update.auto`
-- `app.update.enabled`
-- `app.update.silent`
-
-Firefox will already have started the update, so close and delete it. The settings you changed should be stored as preferences, apart from the application files you've just deleted. Reinstall that ancient version. The next time you open it, and go to "About Firefox", you should see a button desperately pleading with you to "check for updates". Don't click that if you know what's good for you...
-
-### Starting the Selenium Server
+### Starting ChromeDriver
 
 You can run the server locally in a separate Terminal session:
 
-    vendor/bin/selenium-server-standalone
-
-In some cases it may be necessary to start a specific version of Firefox
-
-	vendor/bin/selenium-server-standalone -Dwebdriver.firefox.bin="/Applications/Firefox31.app/Contents/MacOS/firefox-bin"
+    chromedriver
 
 ### Running the Tests
 
@@ -98,9 +80,7 @@ Or even run a single scenario by it's name (supports regular expressions):
 
 	vendor/bin/behat --name 'My scenario title' @framework
 
-This will start a Firefox browser by default. Other browsers and profiles can be configured in `behat.yml`.
-
-For example, if you want to start a Chrome Browser you can following the instructions provided [here](docs/chrome-behat.md).
+This will start a Chrome browser by default. Other browsers and profiles can be configured in `behat.yml`.
 
 ### Running with stand-alone command
 
@@ -127,10 +107,10 @@ Make sure you set `SS_BASE_URL` to `http://localhost:8080` in `.env`
 ## Configuration
 
 The SilverStripe installer already comes with a YML configuration
-which is ready to run tests on a locally hosted Selenium server,
+which is ready to run tests on the standalone ChromeDriver server,
 located in the project root as `behat.yml`.
 
-You should ensure that you have configured SS_BASE_URL in your `.env`.
+You should ensure that you have configured `SS_BASE_URL` in your `.env` file.
 
 Generic Mink configuration settings are placed in `SilverStripe\BehatExtension\MinkExtension`,
 which is a subclass of `Behat\MinkExtension\Extension`.
@@ -167,14 +147,15 @@ Example: behat.yml
                 - %paths.modules.framework%/tests/behat/features/files/
 	  extensions:
         SilverStripe\BehatExtension\MinkExtension:
-          default_session: selenium2
-          javascript_session: selenium2
-          selenium2:
-            browser: firefox
+          default_session: facebook_web_driver
+          javascript_session: facebook_web_driver
+          facebook_web_driver:
+            browser: chrome
+            wd_host: "http://127.0.0.1:9515" #chromedriver port
         SilverStripe\BehatExtension\Extension:
           screenshot_path: %paths.base%/artifacts/screenshots
 
-## Module Initialization
+## Module Initialisation
 
 You're all set to start writing features now! Simply create `*.feature` files
 anywhere in your codebase, and run them as shown above. We recommend the folder
@@ -259,7 +240,8 @@ use the inline definition syntax. The following example shows some syntax variat
 			Then I should see "Page 1" in CMS Tree
 
  * Fixtures are created where you defined them. If you want the fixtures to be created
-   before every scenario, define them in [Background](http://docs.behat.org/guides/1.gherkin.html#backgrounds).
+   before every scenario, define them in 
+   [Background](http://docs.behat.org/en/latest/user_guide/writing_scenarios.html#backgrounds).
    If you want them to be created only when a particular scenario runs, define them there.
  * Fixtures are cleared between scenarios.
  * The basic syntax works for all `DataObject` subclasses, but some specific
@@ -284,7 +266,7 @@ of your module. You can create it with the following commands:
 
 ### FeatureContext
 
-The generic [Behat usage instructions](http://docs.behat.org/) apply
+The generic [Behat usage instructions](http://docs.behat.org/en/latest/user_guide.html) apply
 here as well. The only major difference is the base class from which
 to extend your own `FeatureContext`: It should be `SilverStripeContext`
 rather than `BehatContext`.
@@ -350,8 +332,6 @@ check `BasicContext->handleAjaxBeforeStep()` and the `ajax_steps` configuration 
 Sometimes SilverStripe needs to know the URL of your site. When you're visiting
 your site in a web browser this is easy to work out, but if you're executing
 scripts on the command-line, it has no way of knowing.
-
-To work this out, this module is using [file to URL mapping](http://doc.silverstripe.org/framework/en/topics/commandline#configuration).
 
 ### How does the module interact with the SS database?
 
@@ -421,13 +401,8 @@ The `macgdbp` IDE key needs to match your `xdebug.idekey` php.ini setting.
 ### How do I set up continuous integration through Travis?
 
 Check out the [travis.yml](https://github.com/silverstripe/silverstripe-framework/blob/master/.travis.yml)
-in `silverstripe/framework` for a good example on how to set up Behat tests through [travis-ci.org](http://travis-ci.org).
-Note that the [Travis CI Environment](https://docs.travis-ci.com/user/ci-environment#Firefox)
-does not default to the latest [Firefox ESR](https://www.mozilla.org/en-US/firefox/organizations/all/) release, but an older version.
-(31.0 in January 2017). You should try to run your tests locally with the same Firefox version,
-and [download the correct Firefox release](https://ftp.mozilla.org/pub/firefox/releases/)).
-Alternatively, [configure Travis](https://docs.travis-ci.com/user/firefox/) to use a newer version.
-Don't forget to disable auto-updates in your Firefox settings.
+in `silverstripe/framework` for a good example on how to set up Behat tests through 
+[travis-ci.org](http://travis-ci.org).
 
 ## Cheatsheet
 
@@ -732,13 +707,19 @@ It's based on the `vendor/bin/behat -di @cms` output.
 
 ### Transformations
 
-Behat [transformations](http://docs.behat.org/guides/2.definitions.html#step-argument-transformations)
+Behat [transformations](http://docs.behat.org/en/v2.5/guides/2.definitions.html#step-argument-transformations)
 have the ability to change step arguments based on their original value,
 for example to cast any argument matching the `\d` regex into an actual PHP integer.
 
- * `/^(?:(the|a)) time of (?<val>.*)$/`: Transforms relative time statements compatible with [strtotime()](http://www.php.net/manual/en/datetime.formats.relative.php). Example: "the time of 1 hour ago" might return "22:00:00" if its currently "23:00:00".
- * `/^(?:(the|a)) date of (?<val>.*)$/`: Transforms relative date statements compatible with [strtotime()](http://www.php.net/manual/en/datetime.formats.relative.php). Example: "the date of 2 days ago" might return "2013-10-10" if its currently the 12th of October 2013.
- * `/^(?:(the|a)) datetime of (?<val>.*)$/`: Transforms relative date and time statements compatible with [strtotime()](http://www.php.net/manual/en/datetime.formats.relative.php). Example: "the datetime of 2 days ago" might return "2013-10-10 23:00:00" if its currently the 12th of October 2013.
+ * `/^(?:(the|a)) time of (?<val>.*)$/`: Transforms relative time statements compatible with 
+ [strtotime()](http://www.php.net/manual/en/datetime.formats.relative.php). Example: "the time of 1 hour ago" might 
+ return "22:00:00" if its currently "23:00:00".
+ * `/^(?:(the|a)) date of (?<val>.*)$/`: Transforms relative date statements compatible with 
+ [strtotime()](http://www.php.net/manual/en/datetime.formats.relative.php). Example: "the date of 2 days ago" might 
+ return "2013-10-10" if its currently the 12th of October 2013.
+ * `/^(?:(the|a)) datetime of (?<val>.*)$/`: Transforms relative date and time statements compatible with 
+ [strtotime()](http://www.php.net/manual/en/datetime.formats.relative.php). Example: "the datetime of 2 days ago" might 
+ return "2013-10-10 23:00:00" if its currently the 12th of October 2013.
 
 ## Useful resources
 

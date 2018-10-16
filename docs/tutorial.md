@@ -21,7 +21,7 @@ First of all, check out a default SilverStripe project
 and ensure it runs on your environment. Detailed installation instructions
 can be found in the [README](../README.md) of this module.
 Once you've got the SilverStripe project running, make sure you've
-started Selenium. With all configuration in place, initialize Behat
+started ChromeDriver. With all configuration in place, initialise Behat
 for 
 
 	vendor/bin/behat --init @mysite
