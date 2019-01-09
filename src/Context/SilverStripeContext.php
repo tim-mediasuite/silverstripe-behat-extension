@@ -2,6 +2,7 @@
 
 namespace SilverStripe\BehatExtension\Context;
 
+use Behat\Behat\Hook\Scope\AfterStepScope;
 use Behat\Behat\Hook\Scope\BeforeScenarioScope;
 use Behat\Mink\Element\NodeElement;
 use Behat\Mink\Exception\ElementNotFoundException;
@@ -273,6 +274,27 @@ abstract class SilverStripeContext extends MinkContext implements SilverStripeAw
         DataObject::reset();
         if (class_exists(SiteTree::class)) {
             SiteTree::reset();
+        }
+    }
+
+    /**
+     * @AfterStep
+     *
+     * Wait for all requests to be handled after each step
+     *
+     * @param AfterStepScope $event
+     */
+    public function waitResponsesAfterStep(AfterStepScope $event)
+    {
+        $success = $this->testSessionEnvironment->waitForPendingRequests();
+        if (!$success) {
+            echo (
+                'Warning! The timeout for waiting a response from the server has expired...'.PHP_EOL.
+                'I keep going on, but this test behaviour may be inconsistent.'.PHP_EOL.PHP_EOL.
+                'Your action required!'.PHP_EOL.PHP_EOL.
+                'You may want to investigate why the server is responding that slowly.'.PHP_EOL.
+                'Otherwise, you may need to increase the timeout.'
+            );
         }
     }
 
