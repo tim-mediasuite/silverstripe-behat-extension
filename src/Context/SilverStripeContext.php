@@ -460,7 +460,7 @@ abstract class SilverStripeContext extends MinkContext implements SilverStripeAw
     }
 
     /**
-     * Overwritten to click the first *visable* link the DOM.
+     * Overwritten to click the first *visible* link the DOM.
      *
      * @param string $link
      * @throws ElementNotFoundException
