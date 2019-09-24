@@ -443,10 +443,10 @@ JS;
     }
 
     /**
-     * @Given /^I press one of these buttons "([^"]*)"$/
+     * @Given /^I press the "([^"]*)" buttons$/
      * @param string $text A list of button names can be provided by seperating the entries with the | character.
      */
-    public function stepIPressOneOfTheseButtons($text)
+    public function stepIPressTheButtons($text)
     {
         $buttonNames = explode('|', $text);
         foreach ($buttonNames as $name) {
