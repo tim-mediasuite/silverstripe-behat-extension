@@ -443,6 +443,24 @@ JS;
     }
 
     /**
+     * @Given /^I press one of these buttons "([^"]*)"$/
+     * @param string $text A list of button names can be provided by seperating the entries with the | character.
+     */
+    public function stepIPressOneOfTheseButtons($text)
+    {
+        $buttonNames = explode('|', $text);
+        foreach ($buttonNames as $name) {
+            $button = $this->findNamedButton(trim($name));
+            if ($button) {
+                break;
+            }
+        }
+
+        assertNotNull($button, "{$text} button not found");
+        $button->click();
+    }
+
+    /**
      * Needs to be in single command to avoid "unexpected alert open" errors in Selenium.
      * Example1: I press the "Remove current combo" button, confirming the dialog
      * Example2: I follow the "Remove current combo" link, confirming the dialog
