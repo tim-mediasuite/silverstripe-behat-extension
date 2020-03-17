@@ -240,6 +240,11 @@ abstract class SilverStripeContext extends MinkContext implements SilverStripeAw
             );
         }
 
+        $webDriverSession = $this->getSession();
+        if (!$webDriverSession->isStarted()) {
+            $webDriverSession->start();
+        }
+
         $state = $this->getTestSessionState();
         $this->testSessionEnvironment->startTestSession($state);
 
