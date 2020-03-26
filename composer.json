@@ -21,8 +21,8 @@
         }
     ],
     "require": {
-        "php": ">=7.1",
-        "phpunit/phpunit": "^7@dev",
+        "php": "^7.2",
+        "phpunit/phpunit": "^7 || ^8",
         "behat/behat": "^3.2",
         "behat/mink": "^1.7",
         "behat/mink-extension": "^2.1",
