@@ -8,6 +8,7 @@ use Behat\Mink\Session;
 use Behat\Mink\Mink;
 use Behat\Mink\Driver\DriverInterface;
 use Behat\Mink\Element\Element;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use SilverStripe\BehatExtension\Tests\SilverStripeContextTest\FeatureContext;
 use SilverStripe\Dev\SapphireTest;
@@ -17,7 +18,7 @@ class SilverStripeContextTest extends TestCase
 
     protected $backupGlobals = false;
 
-    public static function setUpBeforeClass()
+    public static function setUpBeforeClass(): void
     {
         // Bootstrap test environment
         parent::setUpBeforeClass();
@@ -100,7 +101,7 @@ class SilverStripeContextTest extends TestCase
     }
 
     /**
-     * @return Element|\PHPUnit_Framework_MockObject_MockObject
+     * @return Element|MockObject
      */
     protected function getElementMock()
     {
