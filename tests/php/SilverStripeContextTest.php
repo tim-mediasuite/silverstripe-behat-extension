@@ -25,22 +25,18 @@ class SilverStripeContextTest extends TestCase
         SapphireTest::start();
     }
 
-    /**
-     * @expectedException \LogicException
-     * @expectedExceptionMessage Cannot find 'region_map' in the behat.yml
-     */
     public function testGetRegionObjThrowsExceptionOnUnknownSelector()
     {
+        $this->expectException(\LogicException::class);
+        $this->expectExceptionMessage('Cannot find \'region_map\' in the behat.yml');
         $context = $this->getContextMock();
         $context->getRegionObj('.unknown');
     }
 
-    /**
-     * @expectedException \LogicException
-     * @expectedExceptionMessage Cannot find the specified region in the behat.yml
-     */
     public function testGetRegionObjThrowsExceptionOnUnknownRegion()
     {
+        $this->expectException(\LogicException::class);
+        $this->expectExceptionMessage('Cannot find the specified region in the behat.yml');
         $context = $this->getContextMock();
         $context->setRegionMap(array('MyRegion' => '.my-region'));
         $context->getRegionObj('.unknown');
