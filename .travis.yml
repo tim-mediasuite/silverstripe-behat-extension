@@ -1,35 +1,36 @@
 language: php
 
-dist: precise
+dist: xenial
 
-sudo: false
+services:
+  - mysql
+  - postgresql
 
 cache:
   directories:
     - $HOME/.composer/cache/files
 
-php:
- - 5.6
-
-env:
-  matrix:
-    - PHPUNIT_TEST=1
-    - PHPCS_TEST=1
-
 matrix:
   include:
     - php: 5.6
-      env: PHPUNIT_TEST=1
-    - php: 7.0
-      env: PHPUNIT_TEST=1
-    - php: 7.1.2
-      env: PHPUNIT_TEST=1
+      env: DB=MYSQL RECIPE_VERSION=4.4.x-dev PHPUNIT_TEST=1 PHPCS_TEST=1
+    - php: 7.1
+      env: DB=MYSQL RECIPE_VERSION=4.5.x-dev PHPUNIT_TEST=1 PDO=1
+    - php: 7.2
+      env: DB=MYSQL RECIPE_VERSION=4.6.x-dev PHPUNIT_TEST=1
+    - php: 7.3
+      env: DB=MYSQL RECIPE_VERSION=4.6.x-dev PHPUNIT_TEST=1 
+    - php: 7.4
+      env: DB=MYSQL RECIPE_VERSION=4.x-dev PHPUNIT_TEST=1
 
 before_script:
   - export PATH=~/.composer/vendor/bin:$PATH
+  - echo 'memory_limit = 2G' >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/travis.ini
   - composer validate
   - composer install --dev --prefer-dist
-  - composer require --prefer-dist --no-update silverstripe/recipe-core:1.0.x-dev
+  - composer require --prefer-dist --no-update silverstripe/recipe-cms:$RECIPE_VERSION
+  # Fix for running phpunit 5 on php 7.4+
+  - composer require --no-update sminnee/phpunit-mock-objects:^3.4.7
   - composer update
   - if [[ $PHPCS_TEST ]]; then composer global require squizlabs/php_codesniffer:^3 --prefer-dist --no-interaction --no-progress --no-suggest -o; fi
   - phpenv rehash
