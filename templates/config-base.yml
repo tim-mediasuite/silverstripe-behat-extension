@@ -7,4 +7,4 @@ default:
       selenium2:
         browser: firefox
     SilverStripe\BehatExtension\Extension:
-      screenshot_path: %paths.base%/artifacts/screenshots
+      screenshot_path: '%paths.base%/artifacts/screenshots'

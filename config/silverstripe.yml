@@ -17,13 +17,13 @@ parameters:
   silverstripe_extension.context.class_path: tests/behat/src/
 services:
   silverstripe_extension.context.initializer:
-    class: %silverstripe_extension.context.initializer.class%
+    class: '%silverstripe_extension.context.initializer.class%'
     calls:
-      - [setAjaxSteps, [%silverstripe_extension.ajax_steps%]]
-      - [setAjaxTimeout, [%silverstripe_extension.ajax_timeout%]]
-      - [setAdminUrl, [%silverstripe_extension.admin_url%]]
-      - [setLoginUrl, [%silverstripe_extension.login_url%]]
-      - [setScreenshotPath, [%silverstripe_extension.screenshot_path%]]
-      - [setRegionMap, [%silverstripe_extension.region_map%]]
+      - [setAjaxSteps, ['%silverstripe_extension.ajax_steps%']]
+      - [setAjaxTimeout, ['%silverstripe_extension.ajax_timeout%']]
+      - [setAdminUrl, ['%silverstripe_extension.admin_url%']]
+      - [setLoginUrl, ['%silverstripe_extension.login_url%']]
+      - [setScreenshotPath, ['%silverstripe_extension.screenshot_path%']]
+      - [setRegionMap, ['%silverstripe_extension.region_map%']]
     tags:
       - { name: context.initializer }
