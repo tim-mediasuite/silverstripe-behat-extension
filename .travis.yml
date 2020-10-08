@@ -15,13 +15,15 @@ matrix:
       env: PHPUNIT_TEST=1
     - php: 7.3
       env: PHPUNIT_TEST=1 PHPCS_TEST=1
+    - php: 7.4
+      env: PHPUNIT_TEST=1
 
 
 
 before_script:
   - export PATH=~/.composer/vendor/bin:$PATH
   - composer validate
-  - composer install --dev --prefer-dist
+  - composer install --prefer-dist
   - composer require --prefer-dist --no-update silverstripe/recipe-core:^4
   - composer update
   - if [[ $PHPCS_TEST ]]; then composer global require squizlabs/php_codesniffer:^3 --prefer-dist --no-interaction --no-progress --no-suggest -o; fi

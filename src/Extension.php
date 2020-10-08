@@ -15,6 +15,7 @@ use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Behat\Testwork\ServiceContainer\ExtensionManager;
 use Behat\Testwork\ServiceContainer\Extension as ExtensionInterface;
+use RuntimeException;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
 
@@ -52,8 +53,26 @@ class Extension implements ExtensionInterface
 
     public function initialize(ExtensionManager $extensionManager)
     {
-        // PHPUnit
-        require_once BASE_PATH . '/vendor/phpunit/phpunit/src/Framework/Assert/Functions.php';
+        // Find PHPUnit assertion implementations
+
+        $found = false;
+
+        $options = [
+            BASE_PATH . '/vendor/sminnee/phpunit/src/Framework/Assert/Functions.php',
+            BASE_PATH . '/vendor/phpunit/phpunit/src/Framework/Assert/Functions.php'
+        ];
+
+        foreach ($options as $file) {
+            if (file_exists($file)) {
+                require_once $file;
+                $found = true;
+                break;
+            }
+        }
+
+        if (!$found) {
+            throw new RuntimeException('Could not find PHPUnit installation');
+        }
     }
 
     public function load(ContainerBuilder $container, array $config)
