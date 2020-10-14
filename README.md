@@ -82,7 +82,7 @@ Or even run a single scenario by it's name (supports regular expressions):
 
 This will start a Chrome browser by default. Other browsers and profiles can be configured in `behat.yml`.
 
-### Running with stand-alone command
+### Running with stand-alone command (requires Bash)
 
 If running with `silverstripe/serve` and `chromedriver`, you can also use the following command
 which will automatically start and stop these services for individual tests.
