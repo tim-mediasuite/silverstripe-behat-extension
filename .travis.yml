@@ -1,10 +1,4 @@
 version: ~> 1.0
 
 import:
-  - silverstripe/silverstripe-travis-shared:config/provision/standard-jobs-fixed.yml
-
-env:
-  global:
-    - COMPOSER_ROOT_VERSION="1.x-dev"
-    - REQUIRE_RECIPE="4.x-dev"
-    - PHPUNIT_TEST=1
+  - silverstripe/silverstripe-travis-shared:config/provision/standard-jobs-range.yml
