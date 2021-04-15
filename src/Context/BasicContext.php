@@ -278,7 +278,7 @@ JS;
     public function closeModalDialog(AfterScenarioScope $event)
     {
         $expectsUnsavedChangesModal = $this->stepHasTag($event, 'unsavedChanges');
-        
+
         try {
             // Only for failed tests on CMS page
             if ($expectsUnsavedChangesModal || $event->getTestResult()->getResultCode() === TestResult::FAILED) {
@@ -485,6 +485,18 @@ JS;
     {
         $this->stepIPressTheButton($button);
         $this->iDismissTheDialog();
+    }
+
+    /**
+     * @Given /^I click on the "([^"]+)" element$/
+     * @param string $selector
+     */
+    public function iClickOnTheElement($selector)
+    {
+        $page = $this->getMainContext()->getSession()->getPage();
+        $element = $page->find('css', $selector);
+        assertNotNull($element, sprintf('Element %s not found', $selector));
+        $element->click();
     }
 
     /**
@@ -867,7 +879,7 @@ JS;
 
         $linkObj = $regionObj->findLink($link);
         if (empty($linkObj)) {
-            throw new \Exception(sprintf('The link "%s" was not found in the region "%s" 
+            throw new \Exception(sprintf('The link "%s" was not found in the region "%s"
 				on the page %s', $link, $region, $this->getSession()->getCurrentUrl()));
         }
 
@@ -893,7 +905,7 @@ JS;
 
         $fieldObj = $regionObj->findField($field);
         if (empty($fieldObj)) {
-            throw new \Exception(sprintf('The field "%s" was not found in the region "%s" 
+            throw new \Exception(sprintf('The field "%s" was not found in the region "%s"
 				on the page %s', $field, $region, $this->getSession()->getCurrentUrl()));
         }
 
@@ -1031,11 +1043,11 @@ JS;
         );
 
         // Find tables by a <caption> field
-        $candidates += $page->findAll('xpath', "//table//caption[contains(normalize-space(string(.)), 
+        $candidates += $page->findAll('xpath', "//table//caption[contains(normalize-space(string(.)),
 			$selector)]/ancestor-or-self::table[1]");
 
         // Find tables by a .title node
-        $candidates += $page->findAll('xpath', "//table//*[contains(concat(' ',normalize-space(@class),' '), ' title ') and contains(normalize-space(string(.)), 
+        $candidates += $page->findAll('xpath', "//table//*[contains(concat(' ',normalize-space(@class),' '), ' title ') and contains(normalize-space(string(.)),
 			$selector)]/ancestor-or-self::table[1]");
 
         // Some tables don't have a visible title, so look for a fieldset with data-name instead
