@@ -500,6 +500,18 @@ JS;
     }
 
     /**
+     * Needs to be in single command to avoid "unexpected alert open" errors in Selenium.
+     *
+     * @When /^I click on the "([^"]+)" element, confirming the dialog$/
+     * @param $selector
+     */
+    public function iClickOnTheElementConfirmingTheDialog($selector)
+    {
+        $this->iClickOnTheElement($selector);
+        $this->iConfirmTheDialog();
+    }
+
+    /**
      * @Given /^I (click|double click) "([^"]*)" in the "([^"]*)" element$/
      * @param string $clickType
      * @param string $text
