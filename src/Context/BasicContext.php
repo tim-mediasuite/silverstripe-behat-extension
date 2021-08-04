@@ -1280,7 +1280,6 @@ JS;
         ));
     }
 
-
     /**
      * We have to catch exceptions and log somehow else otherwise behat falls over
      *
@@ -1289,5 +1288,39 @@ JS;
     protected function logException(Exception $exception)
     {
         file_put_contents('php://stderr', 'Exception caught: ' . $exception->getMessage());
+    }
+
+    /**
+     * Detect element with javascript, rather than having the selector converted to xpath
+     * There's already an xpath based function 'I see the "" element' iSeeTheElement() in silverstripe/cms
+     * There's also an 'I should see "" element' in MinkContext which also converts the css selector to xpath
+     *
+     * @When /^I should see the "([^"]+)" element/
+     * @param $selector
+     */
+    public function iShouldSeeTheElement($selector)
+    {
+        $sel = str_replace('"', '\\"', $selector);
+        $js = <<<JS
+return document.querySelector("$sel");
+JS;
+        $element = $this->getSession()->evaluateScript($js);
+        assertNotNull($element, sprintf('Element %s not found', $selector));
+    }
+
+    /**
+     * Selects the option in select field with specified id|name|label|value.
+     * Note: this is duplicate code from SilverStripeContext selectOption
+     * In practice, the primary context file using in modules have inherited from BasicContext
+     * and not SilverStripeContext so the selectOption method is not available.
+     *
+     * @When /^I select "([^"]+)" from the "([^"]+)" field$/
+     * @param string $value
+     * @param string $locator - select id, name or label - NOT a css selector
+     */
+    public function iSelectFromTheField($value, $locator)
+    {
+        $val = str_replace('"', '\\"', $value);
+        $this->getSession()->getPage()->selectFieldOption($locator, $val);
     }
 }
