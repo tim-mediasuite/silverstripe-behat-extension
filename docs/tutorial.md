@@ -246,7 +246,7 @@ not exactly one record found in the relation, and hence fail that step for Behat
 public function thereShouldBeAnAbuseReportForWithReason($id, $reason)
 {
     $page = $this->fixtureFactory->get('Page', $id);
-    assertEquals(1, $page->PageAbuseReports()->filter('Reason', $reason)->Count());
+    Assert::assertEquals(1, $page->PageAbuseReports()->filter('Reason', $reason)->Count());
 }
 ```
 

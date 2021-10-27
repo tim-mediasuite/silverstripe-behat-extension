@@ -9,6 +9,7 @@ use Behat\Gherkin\Node\PyStringNode;
 use Behat\Gherkin\Node\TableNode;
 use Exception;
 use InvalidArgumentException;
+use PHPUnit\Framework\Assert;
 use SilverStripe\Assets\Folder;
 use SilverStripe\Assets\Storage\AssetStore;
 use SilverStripe\Core\ClassInfo;
@@ -650,7 +651,7 @@ class FixtureContext implements Context
     public function iAddAnExtensionToTheClass($extension, $class)
     {
         // Validate the extension
-        assertTrue(
+        Assert::assertTrue(
             class_exists($extension) && is_subclass_of($extension, Extension::class),
             'Given extension does not extend Extension'
         );
@@ -696,9 +697,9 @@ YAML;
     {
         $project = ModuleManifest::config()->get('project') ?: 'mysite';
         $mysite = ModuleLoader::getModule($project);
-        assertNotNull($mysite, 'Project exists');
+        Assert::assertNotNull($mysite, 'Project exists');
         $destPath = $mysite->getResource("_config/{$filename}")->getPath();
-        assertFileNotExists($destPath, "Config file {$filename} hasn't aleady been loaded");
+        Assert::assertFileDoesNotExist($destPath, "Config file {$filename} hasn't aleady been loaded");
         return $destPath;
     }
 
@@ -712,7 +713,7 @@ YAML;
      */
     public function stepThereShouldBeAFileOrFolder($type, $path)
     {
-        assertFileExists($this->joinPaths(BASE_PATH, $path));
+        Assert::assertFileExists($this->joinPaths(BASE_PATH, $path));
     }
 
     /**
@@ -727,7 +728,7 @@ YAML;
     public function stepThereShouldBeAFileWithTuple($filename, $hash)
     {
         $exists = $this->getAssetStore()->exists($filename, $hash);
-        assertTrue((bool)$exists, "A file exists with filename $filename and hash $hash");
+        Assert::assertTrue((bool)$exists, "A file exists with filename $filename and hash $hash");
     }
 
     /**

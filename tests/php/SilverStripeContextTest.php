@@ -8,6 +8,7 @@ use Behat\Mink\Session;
 use Behat\Mink\Mink;
 use Behat\Mink\Driver\DriverInterface;
 use Behat\Mink\Element\Element;
+use PHPUnit\Framework\MockObject\MockObject;
 use SilverStripe\BehatExtension\Tests\SilverStripeContextTest\FeatureContext;
 use SilverStripe\Dev\SapphireTest;
 
@@ -16,22 +17,18 @@ class SilverStripeContextTest extends SapphireTest
 
     protected $backupGlobals = false;
 
-    /**
-     * @expectedException \LogicException
-     * @expectedExceptionMessage Cannot find 'region_map' in the behat.yml
-     */
     public function testGetRegionObjThrowsExceptionOnUnknownSelector()
     {
+        $this->expectException(\LogicException::class);
+        $this->expectExceptionMessage("Cannot find 'region_map' in the behat.yml");
         $context = $this->getContextMock();
         $context->getRegionObj('.unknown');
     }
 
-    /**
-     * @expectedException \LogicException
-     * @expectedExceptionMessage Cannot find the specified region in the behat.yml
-     */
     public function testGetRegionObjThrowsExceptionOnUnknownRegion()
     {
+        $this->expectException(\LogicException::class);
+        $this->expectExceptionMessage("Cannot find the specified region in the behat.yml");
         $context = $this->getContextMock();
         $context->setRegionMap(array('MyRegion' => '.my-region'));
         $context->getRegionObj('.unknown');
@@ -92,7 +89,7 @@ class SilverStripeContextTest extends SapphireTest
     }
 
     /**
-     * @return Element|\PHPUnit_Framework_MockObject_MockObject
+     * @return Element|MockObject
      */
     protected function getElementMock()
     {

@@ -4,6 +4,7 @@ namespace SilverStripe\BehatExtension\Context;
 
 use Behat\Behat\Context\Context;
 use Behat\Mink\Element\NodeElement;
+use PHPUnit\Framework\Assert;
 use SilverStripe\Security\Authenticator;
 use SilverStripe\Security\Group;
 use SilverStripe\Security\Member;
@@ -32,7 +33,7 @@ class LoginContext implements Context
 
         if (0 == strpos($this->getMainContext()->getSession()->getCurrentUrl(), $loginUrl)) {
             $this->stepILogInWith('admin', 'password');
-            assertStringStartsWith($adminUrl, $this->getMainContext()->getSession()->getCurrentUrl());
+            Assert::assertStringStartsWith($adminUrl, $this->getMainContext()->getSession()->getCurrentUrl());
         }
     }
 
@@ -63,13 +64,13 @@ class LoginContext implements Context
 
         $page = $this->getMainContext()->getSession()->getPage();
         $form = $page->findById('LogoutForm_Form');
-        assertNotNull($form, 'Logout form not found');
+        Assert::assertNotNull($form, 'Logout form not found');
 
         $submitButton = $form->find('css', '[type=submit]');
         $securityID = $form->find('css', '[name=SecurityID]');
 
-        assertNotNull($submitButton, 'Submit button on logout form not found');
-        assertNotNull($securityID, 'CSRF token not found');
+        Assert::assertNotNull($submitButton, 'Submit button on logout form not found');
+        Assert::assertNotNull($securityID, 'CSRF token not found');
 
         $submitButton->press();
     }
@@ -86,7 +87,7 @@ class LoginContext implements Context
         $this->getMainContext()->getSession()->visit($loginUrl);
         $page = $this->getMainContext()->getSession()->getPage();
         $form = $page->findById('MemberLoginForm_LoginForm');
-        assertNotNull($form, 'Login form not found');
+        Assert::assertNotNull($form, 'Login form not found');
 
         // Try to find visible forms again on login page.
         $visibleForm = null;
@@ -94,17 +95,17 @@ class LoginContext implements Context
         if ($form->isVisible() && $form->find('css', '[name=Email]')) {
             $visibleForm = $form;
         }
-        assertNotNull($visibleForm, 'Could not find login email field');
+        Assert::assertNotNull($visibleForm, 'Could not find login email field');
 
         $emailField = $visibleForm->find('css', '[name=Email]');
         $passwordField = $visibleForm->find('css', '[name=Password]');
         $submitButton = $visibleForm->find('css', '[type=submit]');
         $securityID = $visibleForm->find('css', '[name=SecurityID]');
 
-        assertNotNull($emailField, 'Email field on login form not found');
-        assertNotNull($passwordField, 'Password field on login form not found');
-        assertNotNull($submitButton, 'Submit button on login form not found');
-        assertNotNull($securityID, 'CSRF token not found');
+        Assert::assertNotNull($emailField, 'Email field on login form not found');
+        Assert::assertNotNull($passwordField, 'Password field on login form not found');
+        Assert::assertNotNull($submitButton, 'Submit button on login form not found');
+        Assert::assertNotNull($securityID, 'CSRF token not found');
 
         $emailField->setValue($email);
         $passwordField->setValue($password);
@@ -119,7 +120,7 @@ class LoginContext implements Context
         $page = $this->getMainContext()->getSession()->getPage();
         $message = $page->find('css', '.message.error');
         $error = $message ? $message->getText() : null;
-        assertNull($message, 'Could not log in with user ' . $email . '. Error: "' . $error. '""');
+        Assert::assertNull($message, 'Could not log in with user ' . $email . '. Error: "' . $error. '""');
     }
 
     /**
@@ -129,7 +130,7 @@ class LoginContext implements Context
     {
         $page = $this->getMainContext()->getSession()->getPage();
         $loginForm = $page->find('css', '#MemberLoginForm_LoginForm');
-        assertNotNull($loginForm, 'I should see a log-in form');
+        Assert::assertNotNull($loginForm, 'I should see a log-in form');
     }
 
     /**
@@ -139,7 +140,7 @@ class LoginContext implements Context
     {
         $page = $this->getMainContext()->getSession()->getPage();
         $logoutForm = $page->find('css', '#LogoutForm_Form');
-        assertNotNull($logoutForm, 'I should see a log-out form');
+        Assert::assertNotNull($logoutForm, 'I should see a log-out form');
     }
 
     /**
@@ -150,7 +151,7 @@ class LoginContext implements Context
     {
         $page = $this->getMainContext()->getSession()->getPage();
         $message = $page->find('css', sprintf('.message.%s', $type));
-        assertNotNull($message, sprintf('%s message not found.', $type));
+        Assert::assertNotNull($message, sprintf('%s message not found.', $type));
     }
 
     /**
@@ -163,10 +164,10 @@ class LoginContext implements Context
     {
         /** @var Member $member */
         $member = Member::get()->filter('Email', $id)->First();
-        assertNotNull($member);
+        Assert::assertNotNull($member);
         $authenticators = Security::singleton()->getApplicableAuthenticators(Authenticator::CHECK_PASSWORD);
         foreach ($authenticators as $authenticator) {
-            assertTrue($authenticator->checkPassword($member, $password)->isValid());
+            Assert::assertTrue($authenticator->checkPassword($member, $password)->isValid());
         }
     }
 

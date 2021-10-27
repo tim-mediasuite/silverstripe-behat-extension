@@ -17,6 +17,7 @@ use Facebook\WebDriver\WebDriver;
 use Facebook\WebDriver\WebDriverAlert;
 use Facebook\WebDriver\WebDriverExpectedCondition;
 use InvalidArgumentException;
+use PHPUnit\Framework\Assert;
 use SilverStripe\Assets\File;
 use SilverStripe\Assets\Filesystem;
 use SilverStripe\BehatExtension\Utility\StepHelper;
@@ -366,7 +367,7 @@ JS;
     public function stepPageCantBeFound()
     {
         $page = $this->getSession()->getPage();
-        assertTrue(
+        Assert::assertTrue(
             // Content from ErrorPage default record
             $page->hasContent('Page not found')
             // Generic ModelAsController message
@@ -425,9 +426,9 @@ JS;
     {
         $button = $this->findNamedButton($text);
         if (trim($negative)) {
-            assertNull($button, sprintf('%s button found', $text));
+            Assert::assertNull($button, sprintf('%s button found', $text));
         } else {
-            assertNotNull($button, sprintf('%s button not found', $text));
+            Assert::assertNotNull($button, sprintf('%s button not found', $text));
         }
     }
 
@@ -438,7 +439,7 @@ JS;
     public function stepIPressTheButton($text)
     {
         $button = $this->findNamedButton($text);
-        assertNotNull($button, "{$text} button not found");
+        Assert::assertNotNull($button, "{$text} button not found");
         $button->click();
     }
 
@@ -456,7 +457,7 @@ JS;
             }
         }
 
-        assertNotNull($button, "{$text} button not found");
+        Assert::assertNotNull($button, "{$text} button not found");
         $button->click();
     }
 
@@ -495,7 +496,7 @@ JS;
     {
         $page = $this->getMainContext()->getSession()->getPage();
         $element = $page->find('css', $selector);
-        assertNotNull($element, sprintf('Element %s not found', $selector));
+        Assert::assertNotNull($element, sprintf('Element %s not found', $selector));
         $element->click();
     }
 
@@ -525,9 +526,9 @@ JS;
         );
         $page = $this->getSession()->getPage();
         $parentElement = $page->find('css', $selector);
-        assertNotNull($parentElement, sprintf('"%s" element not found', $selector));
+        Assert::assertNotNull($parentElement, sprintf('"%s" element not found', $selector));
         $element = $parentElement->find('xpath', sprintf('//*[count(*)=0 and contains(.,"%s")]', $text));
-        assertNotNull($element, sprintf('"%s" not found', $text));
+        Assert::assertNotNull($element, sprintf('"%s" not found', $text));
         $clickTypeFn = $clickTypeMap[$clickType];
         $element->$clickTypeFn();
     }
@@ -569,7 +570,7 @@ JS;
     public function iSeeTheDialogText($expected)
     {
         $text = $this->getExpectedAlert()->getText();
-        assertContains($expected, $text);
+        Assert::assertStringContainsString($expected, $text);
     }
 
     /**
@@ -841,13 +842,13 @@ JS;
             ));
         }
 
-        assertNotNull($element, sprintf("Element '%s' not found", $name));
+        Assert::assertNotNull($element, sprintf("Element '%s' not found", $name));
 
         $disabledAttribute = $element->getAttribute('disabled');
         if (trim($negate)) {
-            assertNull($disabledAttribute, sprintf("Failed asserting element '%s' is not disabled", $name));
+            Assert::assertNull($disabledAttribute, sprintf("Failed asserting element '%s' is not disabled", $name));
         } else {
-            assertNotNull($disabledAttribute, sprintf("Failed asserting element '%s' is disabled", $name));
+            Assert::assertNotNull($disabledAttribute, sprintf("Failed asserting element '%s' is disabled", $name));
         }
     }
 
@@ -864,11 +865,11 @@ JS;
     {
         $page = $this->getSession()->getPage();
         $fieldElement = $page->findField($field);
-        assertNotNull($fieldElement, sprintf("Field '%s' not found", $field));
+        Assert::assertNotNull($fieldElement, sprintf("Field '%s' not found", $field));
 
         $disabledAttribute = $fieldElement->getAttribute('disabled');
 
-        assertNull($disabledAttribute, sprintf("Failed asserting field '%s' is enabled", $field));
+        Assert::assertNull($disabledAttribute, sprintf("Failed asserting field '%s' is enabled", $field));
     }
 
     /**
@@ -887,7 +888,7 @@ JS;
     {
         $context = $this->getMainContext();
         $regionObj = $context->getRegionObj($region);
-        assertNotNull($regionObj);
+        Assert::assertNotNull($regionObj);
 
         $linkObj = $regionObj->findLink($link);
         if (empty($linkObj)) {
@@ -913,7 +914,7 @@ JS;
     {
         $context = $this->getMainContext();
         $regionObj = $context->getRegionObj($region);
-        assertNotNull($regionObj, "Region Object is null");
+        Assert::assertNotNull($regionObj, "Region Object is null");
 
         $fieldObj = $regionObj->findField($field);
         if (empty($fieldObj)) {
@@ -943,7 +944,7 @@ JS;
     {
         $context = $this->getMainContext();
         $regionObj = $context->getRegionObj($region);
-        assertNotNull($regionObj);
+        Assert::assertNotNull($regionObj);
 
         $actual = $regionObj->getText();
         $actual = preg_replace('/\s+/u', ' ', $actual);
@@ -987,7 +988,7 @@ JS;
             'radio',
             $this->getMainContext()->getXpathEscaper()->escapeLiteral($radioLabel)
         ]);
-        assertNotNull($radioButton);
+        Assert::assertNotNull($radioButton);
         $session->getDriver()->click($radioButton->getXPath());
     }
 
@@ -1001,7 +1002,7 @@ JS;
         $table = $this->getTable($selector);
 
         $element = $table->find('named', array('content', "'$text'"));
-        assertNotNull($element, sprintf('Element containing `%s` not found in `%s` table', $text, $selector));
+        Assert::assertNotNull($element, sprintf('Element containing `%s` not found in `%s` table', $text, $selector));
     }
 
     /**
@@ -1014,7 +1015,7 @@ JS;
         $table = $this->getTable($selector);
 
         $element = $table->find('named', array('content', "'$text'"));
-        assertNull($element, sprintf('Element containing `%s` not found in `%s` table', $text, $selector));
+        Assert::assertNull($element, sprintf('Element containing `%s` not found in `%s` table', $text, $selector));
     }
 
     /**
@@ -1027,7 +1028,7 @@ JS;
         $table = $this->getTable($selector);
 
         $element = $table->find('xpath', sprintf('//*[count(*)=0 and contains(.,"%s")]', $text));
-        assertNotNull($element, sprintf('Element containing `%s` not found', $text));
+        Assert::assertNotNull($element, sprintf('Element containing `%s` not found', $text));
         $element->click();
     }
 
@@ -1065,7 +1066,7 @@ JS;
         // Some tables don't have a visible title, so look for a fieldset with data-name instead
         $candidates += $page->findAll('xpath', "//fieldset[@data-name=$selector]//table");
 
-        assertTrue((bool)$candidates, 'Could not find any table elements');
+        Assert::assertTrue((bool)$candidates, 'Could not find any table elements');
 
         $table = null;
         /** @var NodeElement $candidate */
@@ -1075,7 +1076,7 @@ JS;
             }
         }
 
-        assertTrue((bool)$table, 'Found table elements, but none are visible');
+        Assert::assertTrue((bool)$table, 'Found table elements, but none are visible');
 
         return $table;
     }
@@ -1092,19 +1093,19 @@ JS;
     public function theTextBeforeAfter($textBefore, $order, $textAfter, $element)
     {
         $ele = $this->getSession()->getPage()->find('css', $element);
-        assertNotNull($ele, sprintf('%s not found', $element));
+        Assert::assertNotNull($ele, sprintf('%s not found', $element));
 
         // Check both of the texts exist in the element
         $text = $ele->getText();
-        assertTrue(strpos($text, $textBefore) !== 'FALSE', sprintf('%s not found in the element %s', $textBefore, $element));
-        assertTrue(strpos($text, $textAfter) !== 'FALSE', sprintf('%s not found in the element %s', $textAfter, $element));
+        Assert::assertTrue(strpos($text, $textBefore) !== 'FALSE', sprintf('%s not found in the element %s', $textBefore, $element));
+        Assert::assertTrue(strpos($text, $textAfter) !== 'FALSE', sprintf('%s not found in the element %s', $textAfter, $element));
 
         /// Use strpos to get the position of the first occurrence of the two texts (case-sensitive)
         // and compare them with the given order (before or after)
         if ($order === 'before') {
-            assertTrue(strpos($text, $textBefore) < strpos($text, $textAfter));
+            Assert::assertTrue(strpos($text, $textBefore) < strpos($text, $textAfter));
         } else {
-            assertTrue(strpos($text, $textBefore) > strpos($text, $textAfter));
+            Assert::assertTrue(strpos($text, $textBefore) > strpos($text, $textAfter));
         }
     }
 
@@ -1213,7 +1214,7 @@ JS;
     {
         $page = $this->getSession()->getPage();
         $el = $page->find('named', array($type, "'$locator'"));
-        assertNotNull($el, sprintf('%s element not found', $locator));
+        Assert::assertNotNull($el, sprintf('%s element not found', $locator));
 
         $id = $el->getAttribute('id');
         if (empty($id)) {
@@ -1236,7 +1237,7 @@ JS;
     public function iScrollToElement($locator)
     {
         $el = $this->getSession()->getPage()->find('css', $locator);
-        assertNotNull($el, sprintf('The element "%s" is not found', $locator));
+        Assert::assertNotNull($el, sprintf('The element "%s" is not found', $locator));
 
         $id = $el->getAttribute('id');
         if (empty($id)) {
@@ -1305,7 +1306,7 @@ JS;
 return document.querySelector("$sel");
 JS;
         $element = $this->getSession()->evaluateScript($js);
-        assertNotNull($element, sprintf('Element %s not found', $selector));
+        Assert::assertNotNull($element, sprintf('Element %s not found', $selector));
     }
 
     /**

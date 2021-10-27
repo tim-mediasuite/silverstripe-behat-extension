@@ -6,6 +6,7 @@ use Behat\Behat\Context\Context;
 use Behat\Behat\Hook\Scope\BeforeScenarioScope;
 use Behat\Gherkin\Node\TableNode;
 use Behat\Mink\Session;
+use PHPUnit\Framework\Assert;
 use SilverStripe\BehatExtension\Utility\TestMailer;
 use SilverStripe\Control\Email\Email;
 use SilverStripe\Control\Email\Mailer;
@@ -65,9 +66,9 @@ class EmailContext implements Context
         $from = ($direction == 'from') ? $email : null;
         $match = $this->mailer->findEmail($to, $from);
         if (trim($negate)) {
-            assertNull($match);
+            Assert::assertNull($match);
         } else {
-            assertNotNull($match);
+            Assert::assertNotNull($match);
         }
         $this->lastMatchedEmail = $match;
     }
@@ -89,7 +90,7 @@ class EmailContext implements Context
             return $email->Subject;
         }, $allMails)) . '"' : null;
         if (trim($negate)) {
-            assertNull($match);
+            Assert::assertNull($match);
         } else {
             $msg = sprintf(
                 'Could not find email %s "%s" titled "%s".',
@@ -100,7 +101,7 @@ class EmailContext implements Context
             if ($allTitles) {
                 $msg .= ' Existing emails: ' . $allTitles;
             }
-            assertNotNull($match, $msg);
+            Assert::assertNotNull($match, $msg);
         }
         $this->lastMatchedEmail = $match;
     }
@@ -129,9 +130,9 @@ class EmailContext implements Context
         }
 
         if (trim($negate)) {
-            assertNotContains($content, $emailContent);
+            Assert::assertNotContains($content, $emailContent);
         } else {
-            assertContains($content, $emailContent);
+            Assert::assertContains($content, $emailContent);
         }
     }
 
@@ -155,7 +156,7 @@ class EmailContext implements Context
         $emailPlainText = strip_tags($emailContent);
         $emailPlainText = preg_replace("/\h+/", " ", $emailPlainText);
 
-        assertContains($content, $emailPlainText);
+        Assert::assertContains($content, $emailPlainText);
     }
 
     /**
@@ -169,13 +170,13 @@ class EmailContext implements Context
         $to = ($direction == 'to') ? $email : null;
         $from = ($direction == 'from') ? $email : null;
         $match = $this->mailer->findEmail($to, $from);
-        assertNotNull($match);
+        Assert::assertNotNull($match);
 
         $crawler = new Crawler($match->Content);
         $linkEl = $crawler->selectLink($linkSelector);
-        assertNotNull($linkEl);
+        Assert::assertNotNull($linkEl);
         $link = $linkEl->attr('href');
-        assertNotNull($link);
+        Assert::assertNotNull($link);
 
         $this->getMainContext()->visit($link);
     }
@@ -192,13 +193,13 @@ class EmailContext implements Context
         $to = ($direction == 'to') ? $email : null;
         $from = ($direction == 'from') ? $email : null;
         $match = $this->mailer->findEmail($to, $from, $title);
-        assertNotNull($match);
+        Assert::assertNotNull($match);
 
         $crawler = new Crawler($match->Content);
         $linkEl = $crawler->selectLink($linkSelector);
-        assertNotNull($linkEl);
+        Assert::assertNotNull($linkEl);
         $link = $linkEl->attr('href');
-        assertNotNull($link);
+        Assert::assertNotNull($link);
         $this->getMainContext()->visit($link);
     }
 
@@ -218,9 +219,9 @@ class EmailContext implements Context
         $match = $this->lastMatchedEmail;
         $crawler = new Crawler($match->Content);
         $linkEl = $crawler->selectLink($linkSelector);
-        assertNotNull($linkEl);
+        Assert::assertNotNull($linkEl);
         $link = $linkEl->attr('href');
-        assertNotNull($link);
+        Assert::assertNotNull($link);
 
         $this->getMainContext()->visit($link);
     }
@@ -264,11 +265,11 @@ class EmailContext implements Context
         // For "should not contain"
         if (trim($negate)) {
             foreach ($rows as $row) {
-                assertNotContains($row[0], $emailContent);
+                Assert::assertNotContains($row[0], $emailContent);
             }
         } else {
             foreach ($rows as $row) {
-                assertContains($row[0], $emailContent);
+                Assert::assertContains($row[0], $emailContent);
             }
         }
     }
@@ -282,13 +283,13 @@ class EmailContext implements Context
     {
         $match = $this->mailer->findEmail(null, null, $subject);
         if (trim($negate)) {
-            assertNull($match);
+            Assert::assertNull($match);
         } else {
             $msg = sprintf(
                 'Could not find email titled "%s".',
                 $subject
             );
-            assertNotNull($match, $msg);
+            Assert::assertNotNull($match, $msg);
         }
         $this->lastMatchedEmail = $match;
     }
@@ -306,9 +307,9 @@ class EmailContext implements Context
 
         $match = $this->lastMatchedEmail;
         if (trim($negate)) {
-            assertNotContains($from, $match->From);
+            Assert::assertNotContains($from, $match->From);
         } else {
-            assertContains($from, $match->From);
+            Assert::assertContains($from, $match->From);
         }
     }
 
@@ -325,9 +326,9 @@ class EmailContext implements Context
 
         $match = $this->lastMatchedEmail;
         if (trim($negate)) {
-            assertNotContains($to, $match->To);
+            Assert::assertNotContains($to, $match->To);
         } else {
-            assertContains($to, $match->To);
+            Assert::assertContains($to, $match->To);
         }
     }
 
@@ -358,7 +359,7 @@ class EmailContext implements Context
                 break;
             }
         }
-        assertNotNull($href);
+        Assert::assertNotNull($href);
 
         $this->getMainContext()->visit($href);
     }
