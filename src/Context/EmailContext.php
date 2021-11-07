@@ -130,9 +130,9 @@ class EmailContext implements Context
         }
 
         if (trim($negate)) {
-            Assert::assertNotContains($content, $emailContent);
+            Assert::assertStringNotContainsString($content, $emailContent);
         } else {
-            Assert::assertContains($content, $emailContent);
+            Assert::assertStringContainsString($content, $emailContent);
         }
     }
 
@@ -156,7 +156,7 @@ class EmailContext implements Context
         $emailPlainText = strip_tags($emailContent);
         $emailPlainText = preg_replace("/\h+/", " ", $emailPlainText);
 
-        Assert::assertContains($content, $emailPlainText);
+        Assert::assertStringContainsString($content, $emailPlainText);
     }
 
     /**
@@ -265,11 +265,11 @@ class EmailContext implements Context
         // For "should not contain"
         if (trim($negate)) {
             foreach ($rows as $row) {
-                Assert::assertNotContains($row[0], $emailContent);
+                Assert::assertStringNotContainsString($row[0], $emailContent);
             }
         } else {
             foreach ($rows as $row) {
-                Assert::assertContains($row[0], $emailContent);
+                Assert::assertStringContainsString($row[0], $emailContent);
             }
         }
     }
@@ -307,9 +307,9 @@ class EmailContext implements Context
 
         $match = $this->lastMatchedEmail;
         if (trim($negate)) {
-            Assert::assertNotContains($from, $match->From);
+            Assert::assertStringNotContainsString($from, $match->From);
         } else {
-            Assert::assertContains($from, $match->From);
+            Assert::assertStringContainsString($from, $match->From);
         }
     }
 
@@ -326,9 +326,9 @@ class EmailContext implements Context
 
         $match = $this->lastMatchedEmail;
         if (trim($negate)) {
-            Assert::assertNotContains($to, $match->To);
+            Assert::assertStringNotContainsString($to, $match->To);
         } else {
-            Assert::assertContains($to, $match->To);
+            Assert::assertStringContainsString($to, $match->To);
         }
     }
 
