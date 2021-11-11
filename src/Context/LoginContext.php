@@ -110,7 +110,7 @@ class LoginContext implements Context
             $clicked = true;
             break;
         }
-        assertTrue($clicked, 'MFA "Setup later" button was not found so it was not clicked');
+        Assert::assertTrue($clicked, 'MFA "Setup later" button was not found so it was not clicked');
     }
 
     /**
