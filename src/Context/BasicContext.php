@@ -1151,16 +1151,20 @@ JS;
         $page = $this->getSession()->getPage();
         $session = $this->getSession();
         $this->spin(function () use ($page, $session, $text) {
-            $element = $page->find(
+            $elements = $page->findAll(
                 'xpath',
                 $session->getSelectorsHandler()->selectorToXpath("xpath", ".//*[contains(text(), '$text')]")
             );
-
-            if (empty($element)) {
-                return false;
-            } else {
-                return ($element->isVisible());
+            foreach ($elements as $element) {
+                if (empty($element)) {
+                    continue;
+                }
+                if (!$element->isVisible()) {
+                    continue;
+                }
+                return true;
             }
+            return false;
         });
     }
 
