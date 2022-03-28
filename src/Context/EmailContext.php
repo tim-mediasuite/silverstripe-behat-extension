@@ -52,6 +52,7 @@ class EmailContext implements Context
         $this->mailer = new TestMailer();
         Injector::inst()->registerService($this->mailer, Mailer::class);
         Email::config()->update("send_all_emails_to", null);
+        Email::config()->update('admin_email', 'no-reply@example.com');
     }
 
     /**
